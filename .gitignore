@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment and credentials
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+
+# Data and results (large files)
+results_*/
+logs/
+*.log
+data/
+*.csv
+*.json
+!requirements.txt
+
+# Model weights
+*.pt
+*.pth
+*.onnx
+*.h5
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Tool configs
+.claude/
