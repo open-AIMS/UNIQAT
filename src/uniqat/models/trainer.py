@@ -5,21 +5,21 @@ Provides complete training pipeline with GPU acceleration, data augmentation,
 and experiment tracking.
 """
 
+import inspect
+import json
+import warnings
+from collections.abc import Callable
+from pathlib import Path
+
+import albumentations as A
+import cv2
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
-import numpy as np
-from typing import Dict, List, Optional, Tuple, Callable
-from pathlib import Path
-import json
-from tqdm import tqdm
-import cv2
-from PIL import Image
-import albumentations as A
 from albumentations.pytorch import ToTensorV2
-import inspect
-import warnings
+from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 
 class UnderwaterDataset(Dataset):
@@ -31,11 +31,11 @@ class UnderwaterDataset(Dataset):
 
     def __init__(
         self,
-        image_paths: List[str],
-        quality_scores: Optional[List[float]] = None,
-        blue_water_scores: Optional[List[float]] = None,
-        metrics: Optional[List[Dict]] = None,
-        transform: Optional[Callable] = None,
+        image_paths: list[str],
+        quality_scores: list[float] | None = None,
+        blue_water_scores: list[float] | None = None,
+        metrics: list[dict] | None = None,
+        transform: Callable | None = None,
         augment: bool = False,
         scale: float = 1.0
     ):
@@ -108,7 +108,7 @@ class UnderwaterDataset(Dataset):
     def __len__(self) -> int:
         return len(self.image_paths)
 
-    def __getitem__(self, idx: int) -> Dict:
+    def __getitem__(self, idx: int) -> dict:
         """
         Get a single sample.
 
@@ -127,7 +127,7 @@ class UnderwaterDataset(Dataset):
         image = cv2.imread(image_path)
 
         if image is None:
-            raise IOError(f"Failed to load image: {image_path}")
+            raise OSError(f"Failed to load image: {image_path}")
 
         if image.size == 0:
             raise ValueError(f"Image is empty: {image_path}")
@@ -191,7 +191,7 @@ class QualityAssessmentTrainer:
         self,
         model: nn.Module,
         train_loader: DataLoader,
-        val_loader: Optional[DataLoader] = None,
+        val_loader: DataLoader | None = None,
         device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
         learning_rate: float = 1e-4,
         weight_decay: float = 1e-5,
@@ -331,7 +331,7 @@ class QualityAssessmentTrainer:
         avg_loss = total_loss / num_batches
         return avg_loss
 
-    def validate(self) -> Tuple[float, float]:
+    def validate(self) -> tuple[float, float]:
         """
         Validate model.
 
@@ -395,9 +395,9 @@ class QualityAssessmentTrainer:
 
     def compute_loss(
         self,
-        outputs: Dict[str, torch.Tensor],
+        outputs: dict[str, torch.Tensor],
         quality_scores: torch.Tensor,
-        blue_water_scores: Optional[torch.Tensor] = None
+        blue_water_scores: torch.Tensor | None = None
     ) -> torch.Tensor:
         """
         Compute multi-task loss.
@@ -467,7 +467,7 @@ class QualityAssessmentTrainer:
         num_epochs: int,
         early_stopping_patience: int = 10,
         save_best: bool = True
-    ) -> Dict:
+    ) -> dict:
         """
         Train model for multiple epochs.
 
@@ -569,7 +569,7 @@ class QualityAssessmentTrainer:
         try:
             torch.save(checkpoint, path)
         except Exception as e:
-            raise IOError(f"Failed to save checkpoint to {path}: {e}") from e
+            raise OSError(f"Failed to save checkpoint to {path}: {e}") from e
 
     def save_history(self):
         """
@@ -584,7 +584,7 @@ class QualityAssessmentTrainer:
             with open(history_path, 'w') as f:
                 json.dump(self.history, f, indent=2)
         except Exception as e:
-            raise IOError(f"Failed to save training history to {history_path}: {e}") from e
+            raise OSError(f"Failed to save training history to {history_path}: {e}") from e
 
     def load_checkpoint(self, checkpoint_path: str):
         """
@@ -625,8 +625,8 @@ class QualityAssessmentTrainer:
 def create_synthetic_dataset(
     num_images: int = 1000,
     output_dir: str = 'synthetic_data',
-    random_seed: Optional[int] = 42
-) -> Tuple[List[str], List[float], List[float]]:
+    random_seed: int | None = 42
+) -> tuple[list[str], list[float], list[float]]:
     """
     Create synthetic underwater image dataset for training.
 
@@ -656,7 +656,7 @@ def create_synthetic_dataset(
     try:
         output_dir.mkdir(parents=True, exist_ok=True)
     except Exception as e:
-        raise IOError(f"Failed to create output directory {output_dir}: {e}") from e
+        raise OSError(f"Failed to create output directory {output_dir}: {e}") from e
 
     image_paths = []
     quality_scores = []
@@ -716,7 +716,7 @@ def create_synthetic_dataset(
         blue_water_scores.append(blue_severity)
 
     if len(image_paths) == 0:
-        raise IOError(f"Failed to generate any images in {output_dir}")
+        raise OSError(f"Failed to generate any images in {output_dir}")
 
     print(f"Generated {len(image_paths)} synthetic images in {output_dir}")
 

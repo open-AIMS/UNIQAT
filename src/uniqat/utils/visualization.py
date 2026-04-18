@@ -5,14 +5,15 @@ This module provides functions to create visual reports, charts, and
 annotated images showing quality metrics and analysis results.
 """
 
+
 import cv2
-import numpy as np
-from typing import Dict, List, Tuple, Optional
 import matplotlib
+import numpy as np
+
 matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
 import seaborn as sns
+from matplotlib.patches import Rectangle
 
 
 class QualityVisualizer:
@@ -20,7 +21,7 @@ class QualityVisualizer:
     Creates beautiful visualizations for underwater image quality assessment.
     """
 
-    def __init__(self, image: np.ndarray, metrics: Dict, assessment_summary: Dict):
+    def __init__(self, image: np.ndarray, metrics: dict, assessment_summary: dict):
         """
         Initialize visualizer.
 

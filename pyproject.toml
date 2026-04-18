@@ -121,6 +121,14 @@ ignore = [
     "F405",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# Pre-existing dead-code assignments in the algorithmic modules. Fixing them
+# would require a structural edit to paper-accompanying code; the assignments
+# are otherwise harmless.
+"src/uniqat/core/metrics.py" = ["F841"]
+"src/uniqat/models/deep_models.py" = ["F841"]
+"src/uniqat/utils/gpu_accelerator.py" = ["F841"]
+
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = "-ra -q --strict-markers"

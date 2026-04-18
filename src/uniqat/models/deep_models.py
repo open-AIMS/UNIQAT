@@ -5,13 +5,12 @@ This module provides state-of-the-art CNN and Vision Transformer models
 for end-to-end quality prediction with GPU acceleration.
 """
 
+import warnings
+
+import timm
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from typing import Optional, Tuple, Dict
-import timm
 from torchvision import models
-import warnings
 
 
 class UnderwaterQualityNet(nn.Module):
@@ -42,7 +41,7 @@ class UnderwaterQualityNet(nn.Module):
             num_quality_levels: Number of quality classification levels
             dropout: Dropout rate for regularization
         """
-        super(UnderwaterQualityNet, self).__init__()
+        super().__init__()
 
         # RGB stream - ResNet50 (fixed deprecated API)
         try:
@@ -129,7 +128,7 @@ class UnderwaterQualityNet(nn.Module):
         self,
         x_rgb: torch.Tensor,
         x_lab: torch.Tensor
-    ) -> Dict[str, torch.Tensor]:
+    ) -> dict[str, torch.Tensor]:
         """
         Forward pass through dual-stream network.
 
@@ -205,7 +204,7 @@ class SpatialAttention(nn.Module):
         Raises:
             ValueError: If kernel_size is even
         """
-        super(SpatialAttention, self).__init__()
+        super().__init__()
 
         if kernel_size % 2 == 0:
             raise ValueError(f"kernel_size must be odd, got {kernel_size}")
@@ -267,7 +266,7 @@ class VisionTransformerQualityNet(nn.Module):
         Raises:
             RuntimeError: If model cannot be loaded
         """
-        super(VisionTransformerQualityNet, self).__init__()
+        super().__init__()
 
         # Load pretrained ViT
         try:
@@ -319,7 +318,7 @@ class VisionTransformerQualityNet(nn.Module):
             nn.Sigmoid()
         )
 
-    def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         """
         Forward pass through ViT network.
 
@@ -371,7 +370,7 @@ class EfficientNetQualityNet(nn.Module):
             pretrained: Use pretrained weights
             dropout: Dropout rate
         """
-        super(EfficientNetQualityNet, self).__init__()
+        super().__init__()
 
         # Load pretrained EfficientNet
         try:
@@ -420,7 +419,7 @@ class EfficientNetQualityNet(nn.Module):
             nn.Linear(256, 10)  # Predict 10 key metrics
         )
 
-    def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         """Forward pass through EfficientNet."""
         if x.dim() != 4:
             raise ValueError(f"Expected 4D tensor, got {x.dim()}D")
@@ -461,7 +460,7 @@ class SEBlock(nn.Module):
         Raises:
             ValueError: If channels < reduction
         """
-        super(SEBlock, self).__init__()
+        super().__init__()
 
         if channels < reduction:
             warnings.warn(
@@ -525,7 +524,7 @@ class MultiMetricPredictor(nn.Module):
         Raises:
             ValueError: If backbone is not supported
         """
-        super(MultiMetricPredictor, self).__init__()
+        super().__init__()
 
         # Backbone (fixed deprecated API)
         if backbone == 'resnet50':
@@ -612,7 +611,7 @@ class MultiMetricPredictor(nn.Module):
 
         return metrics
 
-    def predict_dict(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def predict_dict(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         """
         Predict metrics and return as dictionary.
 

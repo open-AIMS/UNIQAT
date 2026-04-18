@@ -6,11 +6,10 @@ including detailed analysis of the blue water problem and recommendations
 for marine science applications.
 """
 
-import cv2
-import numpy as np
-from typing import Dict, List, Tuple, Optional
-from dataclasses import dataclass, asdict
 import json
+from dataclasses import asdict, dataclass
+
+import numpy as np
 
 from .metrics import UnderwaterMetrics
 
@@ -35,9 +34,9 @@ class QualityAssessment:
     marine_science_value: float
     blue_water_problem_severity: float
     usability_category: str
-    detailed_metrics: Dict
-    recommendations: List[str]
-    warnings: List[str]
+    detailed_metrics: dict
+    recommendations: list[str]
+    warnings: list[str]
 
     @property
     def feature_quality(self) -> float:
@@ -60,7 +59,7 @@ class QualityAssessment:
         """Alias for blue_water_problem_severity (0-10)."""
         return self.blue_water_problem_severity
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary."""
         d = asdict(self)
         d['feature_quality'] = self.feature_quality
@@ -92,7 +91,7 @@ class UnderwaterImageAssessor:
     BLUE_WATER_MODERATE = 0.5
     BLUE_WATER_MILD = 0.3
 
-    def __init__(self, image_path: Optional[str] = None, image_array: Optional[np.ndarray] = None, scale_factor: float = 1.0):
+    def __init__(self, image_path: str | None = None, image_array: np.ndarray | None = None, scale_factor: float = 1.0):
         """
         Initialize the assessor.
 
@@ -102,8 +101,8 @@ class UnderwaterImageAssessor:
             scale_factor: Scaling factor for resizing (e.g., 0.5 for 50% size). Default: 1.0 (no scaling)
         """
         self.metrics_calculator = UnderwaterMetrics(image_path=image_path, image_array=image_array, scale_factor=scale_factor)
-        self.metrics: Optional[Dict] = None
-        self.assessment: Optional[QualityAssessment] = None
+        self.metrics: dict | None = None
+        self.assessment: QualityAssessment | None = None
 
     def assess(self) -> QualityAssessment:
         """
@@ -185,7 +184,7 @@ class UnderwaterImageAssessor:
         else:
             return "Unusable"
 
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """
         Generate actionable recommendations based on analysis.
 
@@ -281,7 +280,7 @@ class UnderwaterImageAssessor:
 
         return recommendations
 
-    def _generate_warnings(self) -> List[str]:
+    def _generate_warnings(self) -> list[str]:
         """
         Generate warnings about critical quality issues.
 
@@ -489,7 +488,7 @@ class UnderwaterImageAssessor:
         else:
             return "Minimal"
 
-    def is_usable_for_cv_tasks(self) -> Tuple[bool, str]:
+    def is_usable_for_cv_tasks(self) -> tuple[bool, str]:
         """
         Determine if image is usable for computer vision tasks.
 
@@ -517,7 +516,7 @@ class UnderwaterImageAssessor:
             reason = "Image unsuitable for CV tasks due to: " + ", ".join(reasons)
             return False, reason
 
-    def is_usable_for_marine_science(self) -> Tuple[bool, str]:
+    def is_usable_for_marine_science(self) -> tuple[bool, str]:
         """
         Determine if image is usable for marine science research.
 

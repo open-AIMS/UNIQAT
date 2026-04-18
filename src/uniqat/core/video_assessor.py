@@ -5,18 +5,17 @@ Extends the image quality assessment system to handle video files
 with temporal analysis and frame-level quality tracking.
 """
 
-import cv2
-import numpy as np
-from typing import Dict, List, Optional, Tuple
-from pathlib import Path
 import json
-from tqdm import tqdm
-from dataclasses import dataclass, asdict
-import matplotlib.pyplot as plt
-import seaborn as sns
 import warnings
+from dataclasses import asdict, dataclass
+from pathlib import Path
 
-from .assessor import UnderwaterImageAssessor, QualityAssessment
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+from tqdm import tqdm
+
+from .assessor import QualityAssessment, UnderwaterImageAssessor
 
 
 @dataclass
@@ -48,8 +47,8 @@ class VideoQualityAssessment:
     fps: float
     total_frames: int
     analyzed_frames: int
-    frame_assessments: List[Dict]
-    temporal_metrics: Dict
+    frame_assessments: list[dict]
+    temporal_metrics: dict
     overall_video_score: float
     average_frame_score: float
     min_frame_score: float
@@ -58,10 +57,10 @@ class VideoQualityAssessment:
     blue_water_severity_avg: float
     visibility_avg: float
     temporal_stability: float
-    recommendations: List[str]
-    warnings: List[str]
+    recommendations: list[str]
+    warnings: list[str]
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary."""
         return asdict(self)
 
@@ -81,7 +80,7 @@ class VideoQualityAssessor:
         self,
         video_path: str,
         frame_skip: int = 30,
-        max_frames: Optional[int] = None,
+        max_frames: int | None = None,
         use_gpu: bool = False
     ):
         """
@@ -125,11 +124,11 @@ class VideoQualityAssessor:
         self.duration = self.total_frames / self.fps
 
         # Frame assessments
-        self.frame_assessments: List[QualityAssessment] = []
-        self.frame_indices: List[int] = []
+        self.frame_assessments: list[QualityAssessment] = []
+        self.frame_indices: list[int] = []
 
         # FIXED: Store temporal_metrics as instance variable
-        self._temporal_metrics: Dict = {}
+        self._temporal_metrics: dict = {}
 
     def __del__(self):
         """FIXED: Ensure video capture is always released."""
@@ -253,7 +252,7 @@ class VideoQualityAssessor:
 
         return video_assessment
 
-    def _compute_temporal_metrics(self) -> Dict:
+    def _compute_temporal_metrics(self) -> dict:
         """
         Compute temporal consistency metrics.
 
@@ -342,7 +341,7 @@ class VideoQualityAssessor:
 
         return float(stability)
 
-    def _generate_video_recommendations(self) -> List[str]:
+    def _generate_video_recommendations(self) -> list[str]:
         """
         Generate video-specific recommendations.
 
@@ -409,7 +408,7 @@ class VideoQualityAssessor:
 
         return recommendations
 
-    def _generate_video_warnings(self) -> List[str]:
+    def _generate_video_warnings(self) -> list[str]:
         """
         Generate video-specific warnings.
 
@@ -533,15 +532,15 @@ class VideoQualityAssessor:
             plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
             print(f"Quality timeline saved to: {output_path}")
         except Exception as e:
-            raise IOError(f"Failed to save timeline to {output_path}: {e}") from e
+            raise OSError(f"Failed to save timeline to {output_path}: {e}") from e
         finally:
             plt.close()
 
     def extract_best_frames(
         self,
         num_frames: int = 10,
-        output_dir: Optional[str] = None
-    ) -> List[Tuple[int, float]]:
+        output_dir: str | None = None
+    ) -> list[tuple[int, float]]:
         """
         Extract best quality frames from video.
 

@@ -5,12 +5,11 @@ This module implements various quality metrics specifically designed for
 underwater and waterfall images affected by the "blue water problem".
 """
 
+import warnings
+
 import cv2
 import numpy as np
-from typing import Dict, Tuple, Optional
 from scipy import ndimage
-from scipy.stats import entropy
-import warnings
 
 warnings.filterwarnings('ignore')
 
@@ -29,7 +28,7 @@ class UnderwaterMetrics:
     - Information content (entropy, gradient magnitude)
     """
 
-    def __init__(self, image_path: Optional[str] = None, image_array: Optional[np.ndarray] = None, scale_factor: float = 1.0):
+    def __init__(self, image_path: str | None = None, image_array: np.ndarray | None = None, scale_factor: float = 1.0):
         """
         Initialize with either image path or numpy array.
 
@@ -69,7 +68,7 @@ class UnderwaterMetrics:
 
         self.height, self.width = self.image.shape[:2]
 
-    def calculate_all_metrics(self) -> Dict[str, float]:
+    def calculate_all_metrics(self) -> dict[str, float]:
         """
         Calculate all available metrics for the underwater image.
 
@@ -113,7 +112,7 @@ class UnderwaterMetrics:
 
         return metrics
 
-    def analyze_color_cast(self) -> Dict[str, float]:
+    def analyze_color_cast(self) -> dict[str, float]:
         """
         Analyze blue-green color cast (blue water problem indicator).
 
@@ -153,7 +152,7 @@ class UnderwaterMetrics:
             'color_channel_std': float(color_std),
         }
 
-    def analyze_contrast(self) -> Dict[str, float]:
+    def analyze_contrast(self) -> dict[str, float]:
         """
         Analyze various contrast measures.
 
@@ -261,7 +260,7 @@ class UnderwaterMetrics:
 
         return float(blur_estimate)
 
-    def analyze_feature_richness(self) -> Dict[str, float]:
+    def analyze_feature_richness(self) -> dict[str, float]:
         """
         Analyze the richness of features in the image.
 
@@ -504,7 +503,7 @@ class UnderwaterMetrics:
 
         return float(np.mean(entropies))
 
-    def analyze_color_distribution(self) -> Dict[str, float]:
+    def analyze_color_distribution(self) -> dict[str, float]:
         """
         Analyze color distribution characteristics.
 

@@ -5,17 +5,15 @@ Provides CUDA-accelerated batch processing and metric computation
 for significant speedup on large datasets.
 """
 
-import torch
-import torch.nn.functional as F
+import warnings
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
 import cv2
 import numpy as np
-from typing import List, Dict, Optional, Tuple
-from pathlib import Path
+import torch
+import torch.nn.functional as F
 from tqdm import tqdm
-from concurrent.futures import ThreadPoolExecutor
-import queue
-import threading
-import warnings
 
 
 class GPUBatchProcessor:
@@ -68,9 +66,9 @@ class GPUBatchProcessor:
 
     def process_batch_images(
         self,
-        image_paths: List[str],
-        model: Optional[torch.nn.Module] = None
-    ) -> List[Dict]:
+        image_paths: list[str],
+        model: torch.nn.Module | None = None
+    ) -> list[dict]:
         """
         Process multiple images in batches with GPU acceleration.
 
@@ -109,7 +107,7 @@ class GPUBatchProcessor:
 
         return results
 
-    def _load_image_batch(self, image_paths: List[str]) -> Tuple[torch.Tensor, List[str]]:
+    def _load_image_batch(self, image_paths: list[str]) -> tuple[torch.Tensor, list[str]]:
         """
         Load a batch of images in parallel.
 
@@ -137,7 +135,7 @@ class GPUBatchProcessor:
 
         return torch.stack(images), valid_paths
 
-    def _load_and_preprocess(self, image_path: str) -> Optional[torch.Tensor]:
+    def _load_and_preprocess(self, image_path: str) -> torch.Tensor | None:
         """
         Load and preprocess a single image.
 
@@ -175,9 +173,9 @@ class GPUBatchProcessor:
     def _process_gpu_batch(
         self,
         batch: torch.Tensor,
-        image_paths: List[str],
-        model: Optional[torch.nn.Module] = None
-    ) -> List[Dict]:
+        image_paths: list[str],
+        model: torch.nn.Module | None = None
+    ) -> list[dict]:
         """
         Process a batch of images on GPU.
 
@@ -247,7 +245,7 @@ class GPUBatchProcessor:
 
         return results
 
-    def _compute_gpu_metrics(self, image: torch.Tensor) -> Dict:
+    def _compute_gpu_metrics(self, image: torch.Tensor) -> dict:
         """
         Compute metrics on GPU for a single image.
 
@@ -415,7 +413,7 @@ class CUDAMetricsAccelerator:
         kernel = kernel / kernel.sum()
         return kernel.view(1, 1, kernel_size, kernel_size)
 
-    def compute_all_metrics_gpu(self, image: torch.Tensor) -> Dict[str, float]:
+    def compute_all_metrics_gpu(self, image: torch.Tensor) -> dict[str, float]:
         """
         Compute all metrics on GPU for maximum speed.
 
@@ -432,7 +430,7 @@ class CUDAMetricsAccelerator:
         if image.dim() == 3:
             image = image.unsqueeze(0)
         elif image.dim() == 2:
-            raise ValueError(f"Image must be at least 3D (C, H, W), got 2D tensor")
+            raise ValueError("Image must be at least 3D (C, H, W), got 2D tensor")
         elif image.dim() > 4:
             raise ValueError(f"Image must be at most 4D (B, C, H, W), got {image.dim()}D tensor")
 
@@ -461,7 +459,7 @@ class CUDAMetricsAccelerator:
 
         return metrics
 
-    def _color_stats_gpu(self, image: torch.Tensor) -> Dict[str, float]:
+    def _color_stats_gpu(self, image: torch.Tensor) -> dict[str, float]:
         """Compute color statistics on GPU."""
         b, g, r = image[:, 2], image[:, 1], image[:, 0]
 
@@ -474,7 +472,7 @@ class CUDAMetricsAccelerator:
             'red_std': r.std().item()
         }
 
-    def _contrast_gpu(self, gray: torch.Tensor) -> Dict[str, float]:
+    def _contrast_gpu(self, gray: torch.Tensor) -> dict[str, float]:
         """Compute contrast metrics on GPU."""
         # RMS contrast
         mean_val = gray.mean()
@@ -490,7 +488,7 @@ class CUDAMetricsAccelerator:
             'michelson_contrast': michelson.item()
         }
 
-    def _sharpness_gpu(self, gray: torch.Tensor) -> Dict[str, float]:
+    def _sharpness_gpu(self, gray: torch.Tensor) -> dict[str, float]:
         """Compute sharpness metrics on GPU."""
         # Laplacian variance
         lap = F.conv2d(gray, self.laplacian, padding=1)
@@ -507,7 +505,7 @@ class CUDAMetricsAccelerator:
             'gradient_magnitude': grad_mean.item()
         }
 
-    def _edge_metrics_gpu(self, gray: torch.Tensor) -> Dict[str, float]:
+    def _edge_metrics_gpu(self, gray: torch.Tensor) -> dict[str, float]:
         """Compute edge metrics on GPU."""
         # Compute gradients
         gx = F.conv2d(gray, self.sobel_x, padding=1)
