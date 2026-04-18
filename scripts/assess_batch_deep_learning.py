@@ -41,10 +41,11 @@ from PIL import Image
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Allow running from a fresh clone without `pip install -e .` by adding the
+# sibling src/ directory to sys.path. No-op when the package is installed.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from models.deep_models import (
+from uniqat.models.deep_models import (
     UnderwaterQualityNet,
     VisionTransformerQualityNet,
     EfficientNetQualityNet,

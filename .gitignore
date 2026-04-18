@@ -37,7 +37,7 @@ logs/
 data/
 *.csv
 *.json
-!requirements.txt
+!CITATION.cff
 
 # Model weights
 *.pt
@@ -50,3 +50,9 @@ data/
 
 # Tool configs
 .claude/
+
+# Build artefacts
+src/*.egg-info/
+
+# pdoc local build
+site/

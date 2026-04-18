@@ -38,11 +38,12 @@ from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import partial
 
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Allow running from a fresh clone without `pip install -e .` by adding the
+# sibling src/ directory to sys.path. No-op when the package is installed.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from core.assessor import UnderwaterImageAssessor
-from models.deep_models import (
+from uniqat.core.assessor import UnderwaterImageAssessor
+from uniqat.models.deep_models import (
     UnderwaterQualityNet,
     EfficientNetQualityNet,
     VisionTransformerQualityNet

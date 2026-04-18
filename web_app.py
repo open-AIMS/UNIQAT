@@ -19,12 +19,13 @@ import atexit
 import shutil
 import warnings
 
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent))
+# Allow running from a fresh clone without `pip install -e .` by adding the
+# sibling src/ directory to sys.path. No-op when the package is installed.
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
-from core.assessor import UnderwaterImageAssessor
-from core.video_assessor import VideoQualityAssessor
-from utils.visualization import QualityVisualizer
+from uniqat.core.assessor import UnderwaterImageAssessor
+from uniqat.core.video_assessor import VideoQualityAssessor
+from uniqat.utils.visualization import QualityVisualizer
 
 
 class UnderwaterIQAWebApp:

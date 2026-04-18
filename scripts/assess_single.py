@@ -11,11 +11,12 @@ import os
 import argparse
 from pathlib import Path
 
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Allow running from a fresh clone without `pip install -e .` by adding the
+# sibling src/ directory to sys.path. No-op when the package is installed.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from core.assessor import UnderwaterImageAssessor
-from utils.visualization import QualityVisualizer
+from uniqat.core.assessor import UnderwaterImageAssessor
+from uniqat.utils.visualization import QualityVisualizer
 
 
 def main():

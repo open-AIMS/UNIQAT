@@ -41,16 +41,17 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import warnings
 
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Allow running from a fresh clone without `pip install -e .` by adding the
+# sibling src/ directory to sys.path. No-op when the package is installed.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from models.deep_models import (
+from uniqat.models.deep_models import (
     UnderwaterQualityNet,
     VisionTransformerQualityNet,
     EfficientNetQualityNet,
     MultiMetricPredictor
 )
-from models.trainer import (
+from uniqat.models.trainer import (
     UnderwaterDataset,
     QualityAssessmentTrainer,
     create_synthetic_dataset
