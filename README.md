@@ -1,7 +1,7 @@
 # UNIQAT: UNderwater Image QUality Assessment Toolkit
 
 [![test](https://github.com/open-AIMS/UNIQAT/actions/workflows/test.yml/badge.svg)](https://github.com/open-AIMS/UNIQAT/actions/workflows/test.yml)
-[![docs](https://github.com/open-AIMS/UNIQAT/actions/workflows/docs.yml/badge.svg)](https://open-AIMS.github.io/UNIQAT/)
+[![docs build](https://github.com/open-AIMS/UNIQAT/actions/workflows/docs.yml/badge.svg)](https://github.com/open-AIMS/UNIQAT/actions/workflows/docs.yml)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![pip install](https://img.shields.io/badge/pip%20install-editable-orange.svg)](#installation)
@@ -314,7 +314,10 @@ UNIQAT/
 
 ## Getting help
 
-- **API reference**: <https://open-AIMS.github.io/UNIQAT/>
+- **API reference**: build the pdoc site locally with
+  `pdoc -o site -d numpy uniqat && python docs/postprocess.py site`
+  then open `site/uniqat.html`. Hosted docs are not available while
+  the repository is private on a non-Enterprise organisation.
 - **Frequently asked questions**: [FAQ.md](FAQ.md) covers minimum image
   requirements, running without a GPU, using the SLURM scripts on the
   JCU HPC, interpreting the nine category scores, choosing a deep

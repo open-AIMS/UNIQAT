@@ -1,16 +1,7 @@
 # API documentation
 
 The API reference for `uniqat` is auto-generated from in-source NumPy-style
-docstrings using [pdoc](https://pdoc.dev/) and deployed to GitHub Pages on
-every push to `main` via `.github/workflows/docs.yml`.
-
-Hosted docs: <https://open-AIMS.github.io/UNIQAT/>
-
-The UNIQAT repository is private to the `open-AIMS` organisation. The hosted
-documentation is therefore visible only to collaborators with access to the
-repository. See the project README for how to request access.
-
-## Build the docs locally
+docstrings using [pdoc](https://pdoc.dev/). Build it locally:
 
 ```bash
 pip install -e .[deep,web,dev]
@@ -20,6 +11,25 @@ python -m http.server -d site
 ```
 
 Open <http://localhost:8000/> in your browser.
+
+## Hosted docs (requires a public repository or GitHub Enterprise)
+
+`.github/workflows/docs.yml` contains a `build` job that renders the site
+on every push to `main` as a smoke test, and a `deploy` job that publishes
+it to GitHub Pages when manually triggered from the Actions tab. The
+`deploy` job is gated by `if: github.event_name == 'workflow_dispatch'`
+because GitHub Pages is only available on public repositories (or on
+private repositories in a GitHub Enterprise organisation). The UNIQAT
+repository is currently private in a free-tier organisation, so the
+hosted path is unavailable until either of those constraints changes.
+
+When the repository becomes public, or the organisation upgrades to
+Enterprise:
+
+1. Enable Pages at Settings -> Pages -> Source: "GitHub Actions".
+2. Trigger the `docs` workflow once from the Actions tab.
+3. Remove the `if:` guard on the `deploy` job so every push to `main`
+   publishes automatically.
 
 The `[deep,web,dev]` extras are required for the local build because the
 `uniqat` package lazily imports the deep learning model classes and the

@@ -3,12 +3,12 @@ contact_links:
   - name: Preprint and paper
     url: https://github.com/open-AIMS/UNIQAT#citation
     about: The accompanying Methods in Ecology and Evolution paper is the authoritative scientific reference.
-  - name: API documentation
-    url: https://open-AIMS.github.io/UNIQAT/
-    about: Auto-generated docs for every public function and class.
   - name: FAQ
     url: https://github.com/open-AIMS/UNIQAT/blob/main/FAQ.md
     about: Common questions about minimum image requirements, non-reef use cases, GPU hardware, and citation.
+  - name: API reference (local build)
+    url: https://github.com/open-AIMS/UNIQAT/blob/main/docs/README.md
+    about: Build the pdoc site locally; hosted docs are unavailable while the repository is private.
   - name: Email the maintainer
     url: mailto:alzayat.saleh@my.jcu.edu.au
     about: For security-sensitive issues, or when a public issue is inappropriate.
