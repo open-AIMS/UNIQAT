@@ -55,6 +55,13 @@ jobs:
           path: site
 
   deploy:
+    # GATED: only runs when manually dispatched from the Actions tab.
+    # Flip this to remove the condition (or change to `if: true`) once
+    # GitHub Pages has been enabled on the repository:
+    #   Settings -> Pages -> Source: "GitHub Actions"
+    # Until then, push events only run the `build` smoke job and do not
+    # attempt to deploy, so no failure notifications are generated.
+    if: github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     environment:
