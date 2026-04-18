@@ -22,19 +22,95 @@ UNIQAT was developed at the [Australian Institute of Marine Science (AIMS)](http
 
 ## Installation
 
+UNIQAT is a standard pip-installable package. AIMS and JCU users on
+workstations or laptops without a CUDA GPU should follow the CPU path; the
+full 37 traditional metrics, the Gradio web UI, and the CLI all run at
+useful speed on CPU. The GPU path is only needed for training or bulk
+deep learning inference.
+
+### CPU path (laptop, workstation, or CI)
+
 ```bash
 git clone https://github.com/open-AIMS/UNIQAT.git
 cd UNIQAT
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e .[deep,web]
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 ```
 
-For GPU-accelerated deep learning, install [PyTorch with CUDA support](https://pytorch.org/get-started/locally/) before running `pip install`.
+The CPU `torch` wheel is installed from the PyTorch CPU index to avoid
+pulling the multi-gigabyte CUDA build. The `deep` extra is still useful on
+CPU because it enables the training and inference scripts (just more
+slowly). Drop `[deep]` if you only need the traditional pipeline and the
+web UI.
+
+### GPU path (training, large-scale inference)
+
+```bash
+git clone https://github.com/open-AIMS/UNIQAT.git
+cd UNIQAT
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .[deep,web]
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+```
+
+Pick the matching CUDA-suffixed index URL for your driver from
+<https://pytorch.org/get-started/locally/> (`cu118`, `cu121`, `cu124`, and
+so on). An NVIDIA GPU with at least 8 GB VRAM is recommended for training.
+
+### Developer install
+
+```bash
+pip install -e .[deep,web,dev]
+pytest tests/ -q
+ruff check src/uniqat
+pdoc -o site -d numpy uniqat && python docs/postprocess.py site
+```
+
+### Performance modes
+
+Approximate throughput on 1000 underwater images at 1920x1080, adapted
+from the deep learning benchmarks in `DEEP_LEARNING_README.md`:
+
+| Mode | Hardware | Speed (images per second) | Total time |
+| --- | --- | --- | --- |
+| Traditional, sequential | Intel i7 CPU | 2 to 5 | 3 to 8 minutes |
+| Traditional, 16 workers | Intel i7, 8 physical cores | 12 to 20 | 50 to 80 seconds |
+| Deep learning (EfficientNet) | GTX 1080 GPU | 200 to 300 | 3 to 5 seconds |
+| Deep learning (EfficientNet) | RTX 3090 GPU | 500 to 800 | 1 to 2 seconds |
+| Hybrid (traditional + DL) | i7 CPU + RTX 3090 GPU | 8 to 12 | 80 to 125 seconds |
+
+Use the traditional pipeline for interpretable per-metric reporting and
+small to medium datasets (up to a few thousand images). Use the deep
+learning path for multi-tens-of-thousands-of-images bulk inference; use
+the hybrid mode to combine both.
 
 ## Usage
 
+### Command-line interface
+
+Once installed, UNIQAT exposes three console-script entry points:
+
+```bash
+uniqat-assess single --image_path image.jpg -o results/
+uniqat-assess batch  --paths /path/to/images/ -o results/ --csv results/scores.csv
+uniqat-train  --data-dir /path/to/images/ --labels labels.json --model underwater
+uniqat-web
+```
+
+The `uniqat-*` entry points are thin wrappers around the reference scripts
+in `scripts/`; the reference scripts remain the canonical implementations
+for SLURM and power-user workflows.
+
 ### Single image assessment
+
+```bash
+uniqat-assess single --image_path image.jpg -o results/
+```
+
+Or, using the reference script directly:
 
 ```bash
 python scripts/assess_single.py --image_path image.jpg -o results/
@@ -53,74 +129,97 @@ Marine Science Value:         74.1/100
 ### Batch directory processing
 
 ```bash
-python scripts/assess_batch.py --paths /path/to/images/ \
-    -o results/ --csv results/scores.csv
+uniqat-assess batch --paths /path/to/images/ -o results/ --csv results/scores.csv
 ```
 
 Process with explicit worker count and recursive directory search:
 
 ```bash
-python scripts/assess_batch.py --paths /path/to/images/ \
+uniqat-assess batch --paths /path/to/images/ \
     -r --workers 48 -o results/ --csv results/scores.csv
 ```
 
 Export training labels for the deep learning pipeline:
 
 ```bash
-python scripts/assess_batch.py --paths /path/to/images/ \
+uniqat-assess batch --paths /path/to/images/ \
     -o results/ --save-labels results/training_labels.json
 ```
+
+### GPU-accelerated batch modes
+
+For large (tens of thousands) datasets, the reference scripts
+`scripts/assess_batch_deep_learning.py` and `scripts/assess_batch_hybrid.py`
+provide GPU batch inference and a combined traditional + deep learning
+mode, respectively. See `DEEP_LEARNING_README.md` for usage.
 
 ### Web interface
 
 ```bash
-python web_app.py
+uniqat-web
 ```
 
-Opens a Gradio web application at `http://localhost:7860` for drag-and-drop image quality assessment with interactive visual reports.
+Opens a Gradio web application at `http://localhost:7860` for
+drag-and-drop image quality assessment with interactive visual reports.
+The reference `python web_app.py` invocation still works.
 
 ### Python API
 
 ```python
-from core.assessor import UnderwaterImageAssessor
+import uniqat
 
-assessor = UnderwaterImageAssessor(
-    image_path="image.jpg",
-    scale_factor=1.0
-)
-result = assessor.assess()
+# One-line convenience wrapper for scripting and notebooks.
+result = uniqat.assess_image("image.jpg")
 
 print(f"Overall quality: {result.overall_score:.1f}")
 print(f"Feature quality: {result.feature_quality:.1f}")
-print(f"Colour quality: {result.colour_quality:.1f}")
-print(f"Usability: {result.usability_category}")
-print(f"Blue-water score: {result.blue_water_score:.2f}")
+print(f"Colour quality:  {result.colour_quality:.1f}")
+print(f"Usability:       {result.usability_category}")
+print(f"Blue-water:      {result.blue_water_score:.2f}")
 
-metrics = result.detailed_metrics
+metrics = result.detailed_metrics  # 37 individual metric values
 json_str = result.to_json()
+```
+
+For batch pipelines, instantiate the assessor directly and reuse it across
+images:
+
+```python
+from uniqat import UnderwaterImageAssessor, QualityVisualizer
+
+assessor = UnderwaterImageAssessor(image_path="image.jpg", scale_factor=1.0)
+result = assessor.assess()
+
+visualiser = QualityVisualizer(
+    assessor.metrics_calculator.image,
+    assessor.metrics,
+    result.to_dict(),
+)
+visualiser.create_comprehensive_report("report.png")
 ```
 
 ### Video analysis
 
 ```python
-from core.video_assessor import VideoQualityAssessor
+from uniqat import VideoQualityAssessor
 
 assessor = VideoQualityAssessor(
     video_path="survey_transect.mp4",
     frame_skip=30,
-    max_frames=None
+    max_frames=None,
 )
 assessment = assessor.assess()
 
-print(f"Overall: {assessment.overall_video_score:.1f}")
-print(f"Mean frame score: {assessment.average_frame_score:.1f}")
+print(f"Overall:            {assessment.overall_video_score:.1f}")
+print(f"Mean frame score:   {assessment.average_frame_score:.1f}")
 print(f"Temporal stability: {assessment.temporal_stability:.2f}")
 print(f"Blue-water severity: {assessment.blue_water_severity_avg:.2f}")
 ```
 
 ### HPC batch processing (SLURM)
 
-Example SLURM job scripts are provided in `scripts/`. Edit the input/output paths and submit:
+Example SLURM job scripts are provided in `scripts/`. Edit the input and
+output paths and submit:
 
 ```bash
 sbatch scripts/assess_batch.sh            # single survey
@@ -130,40 +229,49 @@ sbatch scripts/assess_batch_paper.sh      # array job for multiple surveys
 ### Training a deep learning quality model
 
 ```bash
-python scripts/train_quality_model.py \
-    --data-dir /path/to/images/ \
+uniqat-train --data-dir /path/to/images/ \
     --labels /path/to/training_labels.json \
     --model underwater \
     --epochs 50
 ```
 
-See `DEEP_LEARNING_README.md` for full documentation on model architectures and training.
+See `DEEP_LEARNING_README.md` for full documentation on model architectures
+and training.
 
 ## Project Structure
 
 ```
 UNIQAT/
-  core/
-    assessor.py               Main assessment engine and quality scoring
-    metrics.py                37 individual image quality metrics
-    video_assessor.py         Video quality assessment with temporal analysis
-  models/
-    deep_models.py            CNN/EfficientNet/ViT architectures
-    trainer.py                Training loop and data pipeline
-  utils/
-    visualization.py          Quality report and figure generation
-    gpu_accelerator.py        CUDA-accelerated metric computation
-  scripts/
-    assess_single.py          CLI: assess one image
-    assess_batch.py           CLI: batch-assess a directory
+  src/uniqat/                   Installed Python package (pip install -e .)
+    __init__.py                 Public API: UnderwaterImageAssessor, ...
+    cli.py                      uniqat-assess entry point
+    cli_train.py                uniqat-train entry point
+    cli_web.py                  uniqat-web entry point
+    core/
+      assessor.py               Main assessment engine and quality scoring
+      metrics.py                37 individual image quality metrics
+      video_assessor.py         Video quality assessment with temporal analysis
+    models/
+      deep_models.py            CNN, EfficientNet, and ViT architectures
+      trainer.py                Training loop and data pipeline
+    utils/
+      visualization.py          Quality report and figure generation
+      gpu_accelerator.py        CUDA-accelerated metric computation (optional)
+  scripts/                      Reference scripts (kept for SLURM / power users)
+    assess_single.py            Assess one image
+    assess_batch.py             Batch-assess a directory with multiprocessing
     assess_batch_deep_learning.py   GPU-accelerated batch assessment
-    assess_batch_hybrid.py    Combined traditional + deep learning
-    train_quality_model.py    Train a deep learning quality model
-    assess_batch.sh           SLURM job script (single survey)
-    assess_batch_paper.sh     SLURM array job (multiple surveys)
-  web_app.py                  Gradio web interface
-  requirements.txt
-  DEEP_LEARNING_README.md
+    assess_batch_hybrid.py      Combined traditional + deep learning
+    train_quality_model.py      Train a deep learning quality model
+    assess_batch.sh             SLURM job script (single survey)
+    assess_batch_paper.sh       SLURM array job (multiple surveys)
+  examples/                     Runnable examples (see examples/README.md)
+  tests/                        pytest smoke suite (see .github/workflows/test.yml)
+  docs/                         API reference build (pdoc -> GitHub Pages)
+  web_app.py                    Gradio web interface (launched by uniqat-web)
+  filter_video.py               Utility: remove bad frames from a video
+  pyproject.toml                Package metadata and extras
+  DEEP_LEARNING_README.md       Deep learning model and training reference
 ```
 
 ## Authors
