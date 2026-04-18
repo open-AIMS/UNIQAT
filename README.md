@@ -87,6 +87,29 @@ small to medium datasets (up to a few thousand images). Use the deep
 learning path for multi-tens-of-thousands-of-images bulk inference; use
 the hybrid mode to combine both.
 
+## Quick start
+
+After installing UNIQAT with the CPU path above, run the bundled example
+to confirm everything works:
+
+```bash
+python examples/single_image_assessment.py
+```
+
+The script loads `examples/18_img_good.png`, prints the composite quality
+scores, and writes a JSON report and a multi-panel visualisation PNG back
+into the `examples/` directory. It completes in roughly three seconds on
+a modern CPU and requires no command-line arguments.
+
+Two more runnable examples are provided:
+
+- `examples/batch_directory.py` walks a directory and writes a CSV of
+  scores (defaults to the four bundled images).
+- `examples/single_image_assessment.ipynb` is the Jupyter twin of the
+  first script, with per-step explanations.
+
+See `examples/README.md` for the full list with expected runtimes.
+
 ## Usage
 
 ### Command-line interface
@@ -148,10 +171,25 @@ uniqat-assess batch --paths /path/to/images/ \
 
 ### GPU-accelerated batch modes
 
-For large (tens of thousands) datasets, the reference scripts
-`scripts/assess_batch_deep_learning.py` and `scripts/assess_batch_hybrid.py`
-provide GPU batch inference and a combined traditional + deep learning
-mode, respectively. See `DEEP_LEARNING_README.md` for usage.
+Three batch scripts cover different throughput and interpretability
+trade-offs:
+
+- **`scripts/assess_batch.py`** (exposed as `uniqat-assess batch`):
+  the 37 traditional metrics with CPU multiprocessing. Fully
+  interpretable per-metric output, suitable for small to medium
+  datasets up to a few thousand images.
+- **`scripts/assess_batch_deep_learning.py`**: GPU batch inference with
+  a trained deep learning model. Returns only the composite scores, no
+  per-metric breakdown. Best for tens of thousands of images when a
+  trained model is available.
+- **`scripts/assess_batch_hybrid.py`**: runs both the traditional
+  metrics and the deep learning model and combines them with a
+  configurable weighting. Slowest of the three; useful when the deep
+  learning model is new and you want to sanity-check its outputs
+  against the reference metrics.
+
+See `DEEP_LEARNING_README.md` for command-line flags and configuration
+details of the two deep-learning scripts.
 
 ### Web interface
 
@@ -273,6 +311,21 @@ UNIQAT/
   pyproject.toml                Package metadata and extras
   DEEP_LEARNING_README.md       Deep learning model and training reference
 ```
+
+## Getting help
+
+- **API reference**: <https://open-AIMS.github.io/UNIQAT/>
+- **Frequently asked questions**: [FAQ.md](FAQ.md) covers minimum image
+  requirements, running without a GPU, using the SLURM scripts on the
+  JCU HPC, interpreting the nine category scores, choosing a deep
+  learning architecture, and non-marine use cases.
+- **Bug report, feature request, or survey-specific data question**:
+  open an issue at
+  <https://github.com/open-AIMS/UNIQAT/issues/new/choose>. Three
+  templates are provided; the Reef data question template is the right
+  place for survey- or rig-specific questions.
+- **Security-sensitive issues**: email the corresponding author at
+  `alzayat.saleh@my.jcu.edu.au` rather than opening a public issue.
 
 ## Authors
 
