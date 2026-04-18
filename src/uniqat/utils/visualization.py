@@ -25,10 +25,14 @@ class QualityVisualizer:
         """
         Initialize visualizer.
 
-        Args:
-            image: Input image (BGR format)
-            metrics: Dictionary of computed metrics
-            assessment_summary: Summary of assessment results
+        Parameters
+        ----------
+        image : np.ndarray
+            Input image (BGR format)
+        metrics : dict
+            Dictionary of computed metrics
+        assessment_summary : dict
+            Summary of assessment results
         """
         self.image = image
         self.image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -65,8 +69,10 @@ class QualityVisualizer:
         """
         Create a comprehensive visual report with multiple panels.
 
-        Args:
-            output_path: Path to save the report image
+        Parameters
+        ----------
+        output_path : str
+            Path to save the report image
         """
         # Create figure with multiple subplots
         fig = plt.figure(figsize=(20, 16))
@@ -425,8 +431,10 @@ class QualityVisualizer:
         """
         Create side-by-side comparison with annotations.
 
-        Args:
-            output_path: Path to save the comparison image
+        Parameters
+        ----------
+        output_path : str
+            Path to save the comparison image
         """
         fig, axes = plt.subplots(1, 2, figsize=(16, 8))
 

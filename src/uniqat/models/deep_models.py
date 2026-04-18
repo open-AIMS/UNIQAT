@@ -36,10 +36,14 @@ class UnderwaterQualityNet(nn.Module):
         """
         Initialize UnderwaterQualityNet.
 
-        Args:
-            pretrained: Use ImageNet pretrained weights
-            num_quality_levels: Number of quality classification levels
-            dropout: Dropout rate for regularization
+        Parameters
+        ----------
+        pretrained : bool
+            Use ImageNet pretrained weights
+        num_quality_levels : int
+            Number of quality classification levels
+        dropout : float
+            Dropout rate for regularization
         """
         super().__init__()
 
@@ -132,15 +136,22 @@ class UnderwaterQualityNet(nn.Module):
         """
         Forward pass through dual-stream network.
 
-        Args:
-            x_rgb: RGB input tensor (B, 3, H, W)
-            x_lab: LAB input tensor (B, 3, H, W)
+        Parameters
+        ----------
+        x_rgb : torch.Tensor
+            RGB input tensor (B, 3, H, W)
+        x_lab : torch.Tensor
+            LAB input tensor (B, 3, H, W)
 
-        Returns:
+        Returns
+        -------
+        dict[str, torch.Tensor]
             Dictionary containing all predictions
 
-        Raises:
-            ValueError: If input tensors have incompatible shapes
+        Raises
+        ------
+        ValueError
+            If input tensors have incompatible shapes
         """
         # Validate inputs
         if x_rgb.shape != x_lab.shape:
@@ -198,11 +209,15 @@ class SpatialAttention(nn.Module):
         """
         Initialize spatial attention.
 
-        Args:
-            kernel_size: Convolution kernel size (should be odd)
+        Parameters
+        ----------
+        kernel_size : int
+            Convolution kernel size (should be odd)
 
-        Raises:
-            ValueError: If kernel_size is even
+        Raises
+        ------
+        ValueError
+            If kernel_size is even
         """
         super().__init__()
 
@@ -221,10 +236,14 @@ class SpatialAttention(nn.Module):
         """
         Apply spatial attention to input features.
 
-        Args:
-            x: Input tensor (B, C, H, W)
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor (B, C, H, W)
 
-        Returns:
+        Returns
+        -------
+        torch.Tensor
             Attention-weighted features (B, C, H, W)
         """
         if x.dim() != 4:
@@ -258,13 +277,19 @@ class VisionTransformerQualityNet(nn.Module):
         """
         Initialize Vision Transformer quality network.
 
-        Args:
-            model_name: Name of ViT model from timm
-            pretrained: Use pretrained weights
-            dropout: Dropout rate
+        Parameters
+        ----------
+        model_name : str
+            Name of ViT model from timm
+        pretrained : bool
+            Use pretrained weights
+        dropout : float
+            Dropout rate
 
-        Raises:
-            RuntimeError: If model cannot be loaded
+        Raises
+        ------
+        RuntimeError
+            If model cannot be loaded
         """
         super().__init__()
 
@@ -322,10 +347,14 @@ class VisionTransformerQualityNet(nn.Module):
         """
         Forward pass through ViT network.
 
-        Args:
-            x: Input tensor (B, 3, H, W)
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor (B, 3, H, W)
 
-        Returns:
+        Returns
+        -------
+        dict[str, torch.Tensor]
             Dictionary containing predictions
         """
         if x.dim() != 4:
@@ -365,10 +394,14 @@ class EfficientNetQualityNet(nn.Module):
         """
         Initialize EfficientNet quality network.
 
-        Args:
-            model_name: EfficientNet variant
-            pretrained: Use pretrained weights
-            dropout: Dropout rate
+        Parameters
+        ----------
+        model_name : str
+            EfficientNet variant
+        pretrained : bool
+            Use pretrained weights
+        dropout : float
+            Dropout rate
         """
         super().__init__()
 
@@ -453,12 +486,17 @@ class SEBlock(nn.Module):
         """
         Initialize SE block.
 
-        Args:
-            channels: Number of input channels/features
-            reduction: Reduction ratio
+        Parameters
+        ----------
+        channels : int
+            Number of input channels/features
+        reduction : int
+            Reduction ratio
 
-        Raises:
-            ValueError: If channels < reduction
+        Raises
+        ------
+        ValueError
+            If channels < reduction
         """
         super().__init__()
 
@@ -480,10 +518,14 @@ class SEBlock(nn.Module):
         """
         Apply channel attention.
 
-        Args:
-            x: Input tensor (B, C) - 1D features after global pooling
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor (B, C) - 1D features after global pooling
 
-        Returns:
+        Returns
+        -------
+        torch.Tensor
             Attention-weighted features (B, C)
         """
         if x.dim() != 2:
@@ -516,13 +558,19 @@ class MultiMetricPredictor(nn.Module):
         """
         Initialize multi-metric predictor.
 
-        Args:
-            backbone: Backbone architecture ('resnet50' or 'efficientnet_b0')
-            pretrained: Use pretrained weights
-            num_metrics: Number of metrics to predict
+        Parameters
+        ----------
+        backbone : str
+            Backbone architecture ('resnet50' or 'efficientnet_b0')
+        pretrained : bool
+            Use pretrained weights
+        num_metrics : int
+            Number of metrics to predict
 
-        Raises:
-            ValueError: If backbone is not supported
+        Raises
+        ------
+        ValueError
+            If backbone is not supported
         """
         super().__init__()
 
@@ -589,10 +637,14 @@ class MultiMetricPredictor(nn.Module):
         """
         Forward pass to predict all metrics.
 
-        Args:
-            x: Input tensor (B, 3, H, W)
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor (B, 3, H, W)
 
-        Returns:
+        Returns
+        -------
+        torch.Tensor
             Tensor of predicted metrics (B, num_metrics)
         """
         if x.dim() != 4:
@@ -615,10 +667,14 @@ class MultiMetricPredictor(nn.Module):
         """
         Predict metrics and return as dictionary.
 
-        Args:
-            x: Input tensor (B, 3, H, W)
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor (B, 3, H, W)
 
-        Returns:
+        Returns
+        -------
+        dict[str, torch.Tensor]
             Dictionary mapping metric names to values (B,) for each metric
         """
         metrics = self.forward(x)  # (B, num_metrics)

@@ -32,14 +32,21 @@ class GPUBatchProcessor:
         """
         Initialize GPU batch processor.
 
-        Args:
-            device: Device for computation ('cuda' or 'cpu')
-            batch_size: Number of images to process simultaneously
-            num_workers: Number of worker threads for data loading
+        Parameters
+        ----------
+        device : str
+            Device for computation ('cuda' or 'cpu')
+        batch_size : int
+            Number of images to process simultaneously
+        num_workers : int
+            Number of worker threads for data loading
 
-        Raises:
-            ValueError: If batch_size or num_workers are invalid
-            RuntimeError: If CUDA device requested but not available
+        Raises
+        ------
+        ValueError
+            If batch_size or num_workers are invalid
+        RuntimeError
+            If CUDA device requested but not available
         """
         if batch_size <= 0:
             raise ValueError(f"batch_size must be positive, got {batch_size}")
@@ -72,15 +79,22 @@ class GPUBatchProcessor:
         """
         Process multiple images in batches with GPU acceleration.
 
-        Args:
-            image_paths: List of image paths
-            model: Optional deep learning model for prediction
+        Parameters
+        ----------
+        image_paths : list[str]
+            List of image paths
+        model : torch.nn.Module | None
+            Optional deep learning model for prediction
 
-        Returns:
+        Returns
+        -------
+        list[dict]
             List of assessment dictionaries
 
-        Raises:
-            ValueError: If image_paths is empty
+        Raises
+        ------
+        ValueError
+            If image_paths is empty
         """
         if not image_paths:
             raise ValueError("image_paths cannot be empty")
@@ -111,10 +125,14 @@ class GPUBatchProcessor:
         """
         Load a batch of images in parallel.
 
-        Args:
-            image_paths: List of image paths
+        Parameters
+        ----------
+        image_paths : list[str]
+            List of image paths
 
-        Returns:
+        Returns
+        -------
+        tuple[torch.Tensor, list[str]]
             Tuple of (tensor of images (B, C, H, W), list of valid paths)
         """
         images = []
@@ -139,10 +157,14 @@ class GPUBatchProcessor:
         """
         Load and preprocess a single image.
 
-        Args:
-            image_path: Path to image file
+        Parameters
+        ----------
+        image_path : str
+            Path to image file
 
-        Returns:
+        Returns
+        -------
+        torch.Tensor | None
             Preprocessed image tensor or None if loading failed
         """
         try:
@@ -179,12 +201,18 @@ class GPUBatchProcessor:
         """
         Process a batch of images on GPU.
 
-        Args:
-            batch: Tensor of images (B, C, H, W)
-            image_paths: Corresponding image paths (same length as batch)
-            model: Optional model for prediction
+        Parameters
+        ----------
+        batch : torch.Tensor
+            Tensor of images (B, C, H, W)
+        image_paths : list[str]
+            Corresponding image paths (same length as batch)
+        model : torch.nn.Module | None
+            Optional model for prediction
 
-        Returns:
+        Returns
+        -------
+        list[dict]
             List of result dictionaries
         """
         # FIXED: Check batch dimension properly
@@ -249,10 +277,14 @@ class GPUBatchProcessor:
         """
         Compute metrics on GPU for a single image.
 
-        Args:
-            image: Image tensor (C, H, W)
+        Parameters
+        ----------
+        image : torch.Tensor
+            Image tensor (C, H, W)
 
-        Returns:
+        Returns
+        -------
+        dict
             Dictionary of computed metrics
         """
         metrics = {}
@@ -344,11 +376,15 @@ class CUDAMetricsAccelerator:
         """
         Initialize CUDA metrics accelerator.
 
-        Args:
-            device: Device for computation ('cuda' or 'cpu')
+        Parameters
+        ----------
+        device : str
+            Device for computation ('cuda' or 'cpu')
 
-        Raises:
-            RuntimeError: If CUDA device requested but not available
+        Raises
+        ------
+        RuntimeError
+            If CUDA device requested but not available
         """
         # FIXED: Validate device availability
         if device == 'cuda' and not torch.cuda.is_available():
@@ -392,11 +428,16 @@ class CUDAMetricsAccelerator:
         """
         Create Gaussian kernel on GPU.
 
-        Args:
-            kernel_size: Size of the kernel
-            sigma: Standard deviation
+        Parameters
+        ----------
+        kernel_size : int
+            Size of the kernel
+        sigma : float
+            Standard deviation
 
-        Returns:
+        Returns
+        -------
+        torch.Tensor
             Gaussian kernel tensor
         """
         ax = torch.arange(-kernel_size // 2 + 1., kernel_size // 2 + 1., device=self.device)
@@ -417,14 +458,20 @@ class CUDAMetricsAccelerator:
         """
         Compute all metrics on GPU for maximum speed.
 
-        Args:
-            image: Image tensor (B, C, H, W) or (C, H, W)
+        Parameters
+        ----------
+        image : torch.Tensor
+            Image tensor (B, C, H, W) or (C, H, W)
 
-        Returns:
+        Returns
+        -------
+        dict[str, float]
             Dictionary of metrics
 
-        Raises:
-            ValueError: If image has invalid dimensions
+        Raises
+        ------
+        ValueError
+            If image has invalid dimensions
         """
         # FIXED: Validate and handle dimensions properly
         if image.dim() == 3:
@@ -526,13 +573,19 @@ def benchmark_gpu_vs_cpu(image_path: str, num_iterations: int = 100):
     """
     Benchmark GPU vs CPU performance.
 
-    Args:
-        image_path: Path to test image
-        num_iterations: Number of iterations to run
+    Parameters
+    ----------
+    image_path : str
+        Path to test image
+    num_iterations : int
+        Number of iterations to run
 
-    Raises:
-        FileNotFoundError: If image_path doesn't exist
-        ValueError: If image cannot be loaded or num_iterations <= 0
+    Raises
+    ------
+    FileNotFoundError
+        If image_path doesn't exist
+    ValueError
+        If image cannot be loaded or num_iterations <= 0
     """
     import time
 

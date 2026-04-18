@@ -23,24 +23,42 @@ class VideoQualityAssessment:
     """
     Comprehensive video quality assessment results.
 
-    Attributes:
-        video_path: Path to the video file
-        duration_seconds: Total duration in seconds
-        fps: Frames per second
-        total_frames: Total number of frames
-        analyzed_frames: Number of frames analyzed
-        frame_assessments: List of per-frame assessments
-        temporal_metrics: Temporal consistency metrics
-        overall_video_score: Overall video quality score (0-100)
-        average_frame_score: Average quality across frames
-        min_frame_score: Minimum frame quality
-        max_frame_score: Maximum frame quality
-        quality_std: Standard deviation of quality scores
-        blue_water_severity_avg: Average blue water severity
-        visibility_avg: Average visibility
-        temporal_stability: Temporal consistency score (0-1)
-        recommendations: List of recommendations
-        warnings: List of warnings
+    Attributes
+    ----------
+    video_path : str
+        Path to the video file
+    duration_seconds : float
+        Total duration in seconds
+    fps : float
+        Frames per second
+    total_frames : int
+        Total number of frames
+    analyzed_frames : int
+        Number of frames analyzed
+    frame_assessments : list[dict]
+        List of per-frame assessments
+    temporal_metrics : dict
+        Temporal consistency metrics
+    overall_video_score : float
+        Overall video quality score (0-100)
+    average_frame_score : float
+        Average quality across frames
+    min_frame_score : float
+        Minimum frame quality
+    max_frame_score : float
+        Maximum frame quality
+    quality_std : float
+        Standard deviation of quality scores
+    blue_water_severity_avg : float
+        Average blue water severity
+    visibility_avg : float
+        Average visibility
+    temporal_stability : float
+        Temporal consistency score (0-1)
+    recommendations : list[str]
+        List of recommendations
+    warnings : list[str]
+        List of warnings
     """
     video_path: str
     duration_seconds: float
@@ -86,15 +104,23 @@ class VideoQualityAssessor:
         """
         Initialize video quality assessor.
 
-        Args:
-            video_path: Path to the video file
-            frame_skip: Analyze every Nth frame (default: 30 = 1 frame/second at 30fps)
-            max_frames: Maximum number of frames to analyze
-            use_gpu: Use GPU acceleration for processing
+        Parameters
+        ----------
+        video_path : str
+            Path to the video file
+        frame_skip : int
+            Analyze every Nth frame (default: 30 = 1 frame/second at 30fps)
+        max_frames : int | None
+            Maximum number of frames to analyze
+        use_gpu : bool
+            Use GPU acceleration for processing
 
-        Raises:
-            FileNotFoundError: If video file doesn't exist
-            ValueError: If video cannot be opened or has invalid properties
+        Raises
+        ------
+        FileNotFoundError
+            If video file doesn't exist
+        ValueError
+            If video cannot be opened or has invalid properties
         """
         self.video_path = Path(video_path)
         if not self.video_path.exists():
@@ -139,11 +165,15 @@ class VideoQualityAssessor:
         """
         Perform comprehensive video quality assessment.
 
-        Returns:
+        Returns
+        -------
+        VideoQualityAssessment
             VideoQualityAssessment object with all results
 
-        Raises:
-            RuntimeError: If no frames could be analyzed
+        Raises
+        ------
+        RuntimeError
+            If no frames could be analyzed
         """
         print(f"Analyzing video: {self.video_path.name}")
         print(f"Duration: {self.duration:.2f}s, FPS: {self.fps:.2f}, Total frames: {self.total_frames}")
@@ -256,7 +286,9 @@ class VideoQualityAssessor:
         """
         Compute temporal consistency metrics.
 
-        Returns:
+        Returns
+        -------
+        dict
             Dictionary of temporal metrics
         """
         if len(self.frame_assessments) < 2:
@@ -320,7 +352,9 @@ class VideoQualityAssessor:
 
         Higher score means more consistent quality across frames.
 
-        Returns:
+        Returns
+        -------
+        float
             Stability score between 0 and 1
         """
         if len(self.frame_assessments) < 2:
@@ -345,7 +379,9 @@ class VideoQualityAssessor:
         """
         Generate video-specific recommendations.
 
-        Returns:
+        Returns
+        -------
+        list[str]
             List of recommendation strings
         """
         recommendations = []
@@ -412,7 +448,9 @@ class VideoQualityAssessor:
         """
         Generate video-specific warnings.
 
-        Returns:
+        Returns
+        -------
+        list[str]
             List of warning strings
         """
         warnings_list = []
@@ -464,12 +502,17 @@ class VideoQualityAssessor:
         """
         Create a timeline visualization of video quality metrics.
 
-        Args:
-            output_path: Path to save the visualization
+        Parameters
+        ----------
+        output_path : str
+            Path to save the visualization
 
-        Raises:
-            RuntimeError: If no frame assessments available
-            ValueError: If FPS is invalid
+        Raises
+        ------
+        RuntimeError
+            If no frame assessments available
+        ValueError
+            If FPS is invalid
         """
         if len(self.frame_assessments) == 0:
             raise RuntimeError("No frame assessments available for visualization.")
@@ -544,16 +587,24 @@ class VideoQualityAssessor:
         """
         Extract best quality frames from video.
 
-        Args:
-            num_frames: Number of frames to extract
-            output_dir: Directory to save frames (optional)
+        Parameters
+        ----------
+        num_frames : int
+            Number of frames to extract
+        output_dir : str | None
+            Directory to save frames (optional)
 
-        Returns:
+        Returns
+        -------
+        list[tuple[int, float]]
             List of (frame_index, quality_score) tuples
 
-        Raises:
-            RuntimeError: If no frame assessments available
-            ValueError: If num_frames <= 0
+        Raises
+        ------
+        RuntimeError
+            If no frame assessments available
+        ValueError
+            If num_frames <= 0
         """
         if len(self.frame_assessments) == 0:
             raise RuntimeError("No frame assessments available for extraction")
@@ -611,7 +662,9 @@ class VideoQualityAssessor:
         """
         Generate a text summary report.
 
-        Returns:
+        Returns
+        -------
+        str
             Formatted summary string
         """
         report = []

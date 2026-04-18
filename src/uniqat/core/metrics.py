@@ -32,13 +32,19 @@ class UnderwaterMetrics:
         """
         Initialize with either image path or numpy array.
 
-        Args:
-            image_path: Path to the image file
-            image_array: Numpy array of the image (BGR format)
-            scale_factor: Scaling factor for resizing (e.g., 0.5 for 50% size). Default: 1.0 (no scaling)
+        Parameters
+        ----------
+        image_path : str | None
+            Path to the image file
+        image_array : np.ndarray | None
+            Numpy array of the image (BGR format)
+        scale_factor : float
+            Scaling factor for resizing (e.g., 0.5 for 50% size). Default: 1.0 (no scaling)
 
-        Raises:
-            ValueError: If neither or both parameters are provided, or invalid scale_factor
+        Raises
+        ------
+        ValueError
+            If neither or both parameters are provided, or invalid scale_factor
         """
         if image_path is None and image_array is None:
             raise ValueError("Either image_path or image_array must be provided")
@@ -72,7 +78,9 @@ class UnderwaterMetrics:
         """
         Calculate all available metrics for the underwater image.
 
-        Returns:
+        Returns
+        -------
+        dict[str, float]
             Dictionary containing all computed metrics
         """
         metrics = {}
@@ -116,7 +124,9 @@ class UnderwaterMetrics:
         """
         Analyze blue-green color cast (blue water problem indicator).
 
-        Returns:
+        Returns
+        -------
+        dict[str, float]
             Dictionary with color cast metrics
         """
         # Calculate mean values for each channel
@@ -156,7 +166,9 @@ class UnderwaterMetrics:
         """
         Analyze various contrast measures.
 
-        Returns:
+        Returns
+        -------
+        dict[str, float]
             Dictionary with contrast metrics
         """
         # Global contrast (RMS contrast)
@@ -208,7 +220,9 @@ class UnderwaterMetrics:
         """
         Calculate sharpness using Laplacian variance.
 
-        Returns:
+        Returns
+        -------
+        float
             Sharpness score (higher = sharper)
         """
         laplacian = cv2.Laplacian(self.image_gray, cv2.CV_64F)
@@ -218,7 +232,9 @@ class UnderwaterMetrics:
         """
         Calculate sharpness using gradient magnitude.
 
-        Returns:
+        Returns
+        -------
+        float
             Gradient-based sharpness score
         """
         sobelx = cv2.Sobel(self.image_gray, cv2.CV_64F, 1, 0, ksize=3)
@@ -230,7 +246,9 @@ class UnderwaterMetrics:
         """
         Estimate blur using frequency domain analysis.
 
-        Returns:
+        Returns
+        -------
+        float
             Blur estimate (higher = more blurry)
         """
         # Use FFT to analyze frequency content
@@ -264,7 +282,9 @@ class UnderwaterMetrics:
         """
         Analyze the richness of features in the image.
 
-        Returns:
+        Returns
+        -------
+        dict[str, float]
             Dictionary with feature richness metrics
         """
         # Edge density
@@ -304,7 +324,9 @@ class UnderwaterMetrics:
         """
         Calculate texture complexity using local binary patterns approximation.
 
-        Returns:
+        Returns
+        -------
+        float
             Texture complexity score
         """
         # Simplified texture analysis using local variance
@@ -319,7 +341,9 @@ class UnderwaterMetrics:
         """
         Estimate underwater visibility based on multiple factors.
 
-        Returns:
+        Returns
+        -------
+        float
             Visibility score (0-1, higher = better visibility)
         """
         # Combine multiple indicators
@@ -341,7 +365,9 @@ class UnderwaterMetrics:
         """
         Estimate water turbidity (0-1, higher = more turbid).
 
-        Returns:
+        Returns
+        -------
+        float
             Turbidity estimate
         """
         # Turbidity indicators:
@@ -373,7 +399,9 @@ class UnderwaterMetrics:
         Reference: Yang, M., & Sowmya, A. (2015). "An underwater color image
         quality evaluation metric." IEEE TIP.
 
-        Returns:
+        Returns
+        -------
+        float
             UCIQE score
         """
         # Convert to LAB
@@ -407,7 +435,9 @@ class UnderwaterMetrics:
         "Human-Visual-System-Inspired Underwater Image Quality Measures."
         IEEE JOE.
 
-        Returns:
+        Returns
+        -------
+        float
             UIQM score
         """
         # UIQM components: UICM (colorfulness), UISM (sharpness), UIConM (contrast)
@@ -478,10 +508,14 @@ class UnderwaterMetrics:
         """
         Calculate Shannon entropy of an image.
 
-        Args:
-            image: Input image (grayscale)
+        Parameters
+        ----------
+        image : np.ndarray
+            Input image (grayscale)
 
-        Returns:
+        Returns
+        -------
+        float
             Entropy value
         """
         hist, _ = np.histogram(image.flatten(), bins=256, range=(0, 256))
@@ -494,7 +528,9 @@ class UnderwaterMetrics:
         """
         Calculate entropy across color channels.
 
-        Returns:
+        Returns
+        -------
+        float
             Average color entropy
         """
         entropies = []
@@ -507,7 +543,9 @@ class UnderwaterMetrics:
         """
         Analyze color distribution characteristics.
 
-        Returns:
+        Returns
+        -------
+        dict[str, float]
             Dictionary with color distribution metrics
         """
         # Histogram uniformity
@@ -561,7 +599,9 @@ class UnderwaterMetrics:
         This score indicates how useful the image is for feature extraction,
         object detection, and other CV tasks.
 
-        Returns:
+        Returns
+        -------
+        float
             Feature usefulness score (0-100)
         """
         # Get key metrics
@@ -591,7 +631,9 @@ class UnderwaterMetrics:
         This score considers visibility, color fidelity, feature clarity,
         and freedom from blue water problem artifacts.
 
-        Returns:
+        Returns
+        -------
+        float
             Marine science value score (0-100)
         """
         # Get key metrics

@@ -42,17 +42,27 @@ class UnderwaterDataset(Dataset):
         """
         Initialize dataset.
 
-        Args:
-            image_paths: List of image file paths
-            quality_scores: Overall quality scores (0-100)
-            blue_water_scores: Blue water severity scores (0-10)
-            metrics: List of dictionaries containing all metrics
-            transform: Image transformation function
-            augment: Apply data augmentation
-            scale: Scale factor for resizing images (default: 1.0)
+        Parameters
+        ----------
+        image_paths : list[str]
+            List of image file paths
+        quality_scores : list[float] | None
+            Overall quality scores (0-100)
+        blue_water_scores : list[float] | None
+            Blue water severity scores (0-10)
+        metrics : list[dict] | None
+            List of dictionaries containing all metrics
+        transform : Callable | None
+            Image transformation function
+        augment : bool
+            Apply data augmentation
+        scale : float
+            Scale factor for resizing images (default: 1.0)
 
-        Raises:
-            ValueError: If image_paths is empty or if label lists have mismatched lengths
+        Raises
+        ------
+        ValueError
+            If image_paths is empty or if label lists have mismatched lengths
         """
         if not image_paths:
             raise ValueError("image_paths cannot be empty")
@@ -112,15 +122,22 @@ class UnderwaterDataset(Dataset):
         """
         Get a single sample.
 
-        Args:
-            idx: Sample index
+        Parameters
+        ----------
+        idx : int
+            Sample index
 
-        Returns:
+        Returns
+        -------
+        dict
             Dictionary containing image tensors and labels
 
-        Raises:
-            IOError: If image cannot be loaded
-            ValueError: If image is invalid
+        Raises
+        ------
+        IOError
+            If image cannot be loaded
+        ValueError
+            If image is invalid
         """
         # Load image
         image_path = self.image_paths[idx]
@@ -201,18 +218,29 @@ class QualityAssessmentTrainer:
         """
         Initialize trainer.
 
-        Args:
-            model: PyTorch model to train
-            train_loader: Training data loader
-            val_loader: Validation data loader
-            device: Device for training
-            learning_rate: Initial learning rate
-            weight_decay: L2 regularization weight
-            checkpoint_dir: Directory for saving checkpoints
-            log_interval: Log every N batches
+        Parameters
+        ----------
+        model : nn.Module
+            PyTorch model to train
+        train_loader : DataLoader
+            Training data loader
+        val_loader : DataLoader | None
+            Validation data loader
+        device : str
+            Device for training
+        learning_rate : float
+            Initial learning rate
+        weight_decay : float
+            L2 regularization weight
+        checkpoint_dir : str
+            Directory for saving checkpoints
+        log_interval : int
+            Log every N batches
 
-        Raises:
-            ValueError: If train_loader is empty or model is invalid
+        Raises
+        ------
+        ValueError
+            If train_loader is empty or model is invalid
         """
         if len(train_loader) == 0:
             raise ValueError("train_loader cannot be empty")
@@ -267,14 +295,20 @@ class QualityAssessmentTrainer:
         """
         Train for one epoch.
 
-        Args:
-            epoch: Current epoch number
+        Parameters
+        ----------
+        epoch : int
+            Current epoch number
 
-        Returns:
+        Returns
+        -------
+        float
             Average training loss
 
-        Raises:
-            RuntimeError: If no valid batches found in training data
+        Raises
+        ------
+        RuntimeError
+            If no valid batches found in training data
         """
         self.model.train()
         total_loss = 0.0
@@ -335,11 +369,15 @@ class QualityAssessmentTrainer:
         """
         Validate model.
 
-        Returns:
+        Returns
+        -------
+        tuple[float, float]
             Tuple of (average loss, average MAE)
 
-        Raises:
-            RuntimeError: If validation set has no valid batches
+        Raises
+        ------
+        RuntimeError
+            If validation set has no valid batches
         """
         if self.val_loader is None:
             return 0.0, 0.0
@@ -402,16 +440,24 @@ class QualityAssessmentTrainer:
         """
         Compute multi-task loss.
 
-        Args:
-            outputs: Model outputs
-            quality_scores: Ground truth quality scores
-            blue_water_scores: Ground truth blue water scores
+        Parameters
+        ----------
+        outputs : dict[str, torch.Tensor]
+            Model outputs
+        quality_scores : torch.Tensor
+            Ground truth quality scores
+        blue_water_scores : torch.Tensor | None
+            Ground truth blue water scores
 
-        Returns:
+        Returns
+        -------
+        torch.Tensor
             Total loss
 
-        Raises:
-            ValueError: If output shapes are incompatible with targets
+        Raises
+        ------
+        ValueError
+            If output shapes are incompatible with targets
         """
         # FIXED: Ensure shape compatibility for quality score loss
         pred_quality = outputs['quality_score']
@@ -471,16 +517,24 @@ class QualityAssessmentTrainer:
         """
         Train model for multiple epochs.
 
-        Args:
-            num_epochs: Number of epochs to train
-            early_stopping_patience: Stop if no improvement for N epochs
-            save_best: Save best model checkpoint
+        Parameters
+        ----------
+        num_epochs : int
+            Number of epochs to train
+        early_stopping_patience : int
+            Stop if no improvement for N epochs
+        save_best : bool
+            Save best model checkpoint
 
-        Returns:
+        Returns
+        -------
+        dict
             Training history
 
-        Raises:
-            ValueError: If num_epochs <= 0
+        Raises
+        ------
+        ValueError
+            If num_epochs <= 0
         """
         if num_epochs <= 0:
             raise ValueError(f"num_epochs must be positive, got {num_epochs}")
@@ -545,12 +599,17 @@ class QualityAssessmentTrainer:
         """
         Save model checkpoint.
 
-        Args:
-            epoch: Current epoch
-            is_best: Whether this is the best model
+        Parameters
+        ----------
+        epoch : int
+            Current epoch
+        is_best : bool
+            Whether this is the best model
 
-        Raises:
-            IOError: If checkpoint cannot be saved
+        Raises
+        ------
+        IOError
+            If checkpoint cannot be saved
         """
         checkpoint = {
             'epoch': epoch,
@@ -575,8 +634,10 @@ class QualityAssessmentTrainer:
         """
         Save training history to JSON.
 
-        Raises:
-            IOError: If history cannot be saved
+        Raises
+        ------
+        IOError
+            If history cannot be saved
         """
         history_path = self.checkpoint_dir / 'training_history.json'
 
@@ -590,12 +651,17 @@ class QualityAssessmentTrainer:
         """
         Load model from checkpoint.
 
-        Args:
-            checkpoint_path: Path to checkpoint file
+        Parameters
+        ----------
+        checkpoint_path : str
+            Path to checkpoint file
 
-        Raises:
-            FileNotFoundError: If checkpoint file doesn't exist
-            RuntimeError: If checkpoint is corrupt or incompatible
+        Raises
+        ------
+        FileNotFoundError
+            If checkpoint file doesn't exist
+        RuntimeError
+            If checkpoint is corrupt or incompatible
         """
         checkpoint_path = Path(checkpoint_path)
 
@@ -633,17 +699,26 @@ def create_synthetic_dataset(
     Generates images with varying degrees of blue water problem
     and corresponding quality scores.
 
-    Args:
-        num_images: Number of images to generate
-        output_dir: Output directory
-        random_seed: Random seed for reproducibility (None for non-deterministic)
+    Parameters
+    ----------
+    num_images : int
+        Number of images to generate
+    output_dir : str
+        Output directory
+    random_seed : int | None
+        Random seed for reproducibility (None for non-deterministic)
 
-    Returns:
+    Returns
+    -------
+    tuple[list[str], list[float], list[float]]
         Tuple of (image_paths, quality_scores, blue_water_scores)
 
-    Raises:
-        ValueError: If num_images <= 0
-        IOError: If output directory cannot be created or images cannot be saved
+    Raises
+    ------
+    ValueError
+        If num_images <= 0
+    IOError
+        If output directory cannot be created or images cannot be saved
     """
     if num_images <= 0:
         raise ValueError(f"num_images must be positive, got {num_images}")

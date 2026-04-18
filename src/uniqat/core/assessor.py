@@ -19,15 +19,24 @@ class QualityAssessment:
     """
     Comprehensive quality assessment results.
 
-    Attributes:
-        overall_score: Overall quality score (0-100)
-        feature_usefulness: Usefulness for CV tasks (0-100)
-        marine_science_value: Value for marine science (0-100)
-        blue_water_problem_severity: Severity of blue water problem (0-10)
-        usability_category: Category (Excellent/Good/Fair/Poor/Unusable)
-        detailed_metrics: All computed metrics
-        recommendations: List of recommendations
-        warnings: List of warnings about image quality
+    Attributes
+    ----------
+    overall_score : float
+        Overall quality score (0-100)
+    feature_usefulness : float
+        Usefulness for CV tasks (0-100)
+    marine_science_value : float
+        Value for marine science (0-100)
+    blue_water_problem_severity : float
+        Severity of blue water problem (0-10)
+    usability_category : str
+        Category (Excellent/Good/Fair/Poor/Unusable)
+    detailed_metrics : dict
+        All computed metrics
+    recommendations : list[str]
+        List of recommendations
+    warnings : list[str]
+        List of warnings about image quality
     """
     overall_score: float
     feature_usefulness: float
@@ -95,10 +104,14 @@ class UnderwaterImageAssessor:
         """
         Initialize the assessor.
 
-        Args:
-            image_path: Path to the image file
-            image_array: Numpy array of the image (BGR format)
-            scale_factor: Scaling factor for resizing (e.g., 0.5 for 50% size). Default: 1.0 (no scaling)
+        Parameters
+        ----------
+        image_path : str | None
+            Path to the image file
+        image_array : np.ndarray | None
+            Numpy array of the image (BGR format)
+        scale_factor : float
+            Scaling factor for resizing (e.g., 0.5 for 50% size). Default: 1.0 (no scaling)
         """
         self.metrics_calculator = UnderwaterMetrics(image_path=image_path, image_array=image_array, scale_factor=scale_factor)
         self.metrics: dict | None = None
@@ -108,7 +121,9 @@ class UnderwaterImageAssessor:
         """
         Perform comprehensive quality assessment.
 
-        Returns:
+        Returns
+        -------
+        QualityAssessment
             QualityAssessment object with all results
         """
         # Calculate all metrics
@@ -160,7 +175,9 @@ class UnderwaterImageAssessor:
         """
         Calculate blue water problem severity on a 0-10 scale.
 
-        Returns:
+        Returns
+        -------
+        float
             Severity score (0=none, 10=severe)
         """
         blue_water = self.metrics['blue_water_severity']
@@ -188,7 +205,9 @@ class UnderwaterImageAssessor:
         """
         Generate actionable recommendations based on analysis.
 
-        Returns:
+        Returns
+        -------
+        list[str]
             List of recommendation strings
         """
         recommendations = []
@@ -284,7 +303,9 @@ class UnderwaterImageAssessor:
         """
         Generate warnings about critical quality issues.
 
-        Returns:
+        Returns
+        -------
+        list[str]
             List of warning strings
         """
         warnings = []
@@ -366,7 +387,9 @@ class UnderwaterImageAssessor:
         """
         Generate a detailed human-readable report.
 
-        Returns:
+        Returns
+        -------
+        str
             Formatted string report
         """
         if self.assessment is None:
@@ -459,7 +482,9 @@ class UnderwaterImageAssessor:
         """
         Generate a brief summary of the assessment.
 
-        Returns:
+        Returns
+        -------
+        str
             Brief summary string
         """
         if self.assessment is None:
@@ -492,7 +517,9 @@ class UnderwaterImageAssessor:
         """
         Determine if image is usable for computer vision tasks.
 
-        Returns:
+        Returns
+        -------
+        tuple[bool, str]
             Tuple of (is_usable, reason)
         """
         if self.assessment is None:
@@ -520,7 +547,9 @@ class UnderwaterImageAssessor:
         """
         Determine if image is usable for marine science research.
 
-        Returns:
+        Returns
+        -------
+        tuple[bool, str]
             Tuple of (is_usable, reason)
         """
         if self.assessment is None:

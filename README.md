@@ -335,7 +335,7 @@ UNIQAT/
 - **Alzayat Saleh** - College of Science and Engineering, James Cook University, Townsville, QLD, Australia
 - **Arjun Chennu** - Australian Institute of Marine Science, Townsville, QLD, Australia
 
-Correspondence: alzayat.saleh@jcu.edu.au
+Correspondence: alzayat.saleh@my.jcu.edu.au
 
 ## Citation
 
