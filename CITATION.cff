@@ -1,0 +1,64 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite both the software itself
+  and the accompanying paper.
+type: software
+title: >-
+  UNIQAT: UNderwater Image QUality Assessment Toolkit
+abstract: >-
+  Open-source Python package for automated, reference-free
+  underwater image quality assessment. UNIQAT computes 37
+  image quality metrics across nine categories (colour cast,
+  contrast, sharpness, feature richness, visibility, turbidity,
+  underwater-specific IQA, information content, and usability)
+  and combines them into task-specific composite quality
+  scores suitable for reef imaging, marine surveys, and
+  underwater computer vision applications. The toolkit
+  provides a command-line interface, a Python API, a Gradio
+  web application, SLURM job scripts for HPC deployment, and
+  optional deep learning models for fast metric approximation.
+authors:
+  - given-names: Alzayat
+    family-names: Saleh
+    email: alzayat.saleh@my.jcu.edu.au
+    orcid: 'https://orcid.org/0000-0001-6973-019X'
+    affiliation: >-
+      College of Science and Engineering, and Centre for AI
+      and Data Science Innovation, James Cook University,
+      Townsville, QLD, Australia
+  - given-names: Arjun
+    family-names: Chennu
+    affiliation: >-
+      Australian Institute of Marine Science, Townsville,
+      QLD, Australia
+version: 1.0.0
+date-released: '2026-04-18'
+license: MIT
+repository-code: 'https://github.com/open-AIMS/UNIQAT'
+url: 'https://github.com/open-AIMS/UNIQAT'
+keywords:
+  - underwater image quality
+  - reference-free image quality assessment
+  - marine surveys
+  - coral reef imaging
+  - computer vision
+  - deep learning
+  - Australian Institute of Marine Science
+  - James Cook University
+preferred-citation:
+  type: article
+  title: >-
+    UNIQAT: An Open-Source Toolkit for Reproducible Image
+    Quality Assessment in Marine Surveys
+  authors:
+    - given-names: Alzayat
+      family-names: Saleh
+      email: alzayat.saleh@my.jcu.edu.au
+      orcid: 'https://orcid.org/0000-0001-6973-019X'
+      affiliation: James Cook University
+    - given-names: Arjun
+      family-names: Chennu
+      affiliation: Australian Institute of Marine Science
+  journal: Methods in Ecology and Evolution
+  year: 2026
+  notes: In review

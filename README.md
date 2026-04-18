@@ -1,5 +1,11 @@
 # UNIQAT: UNderwater Image QUality Assessment Toolkit
 
+[![test](https://github.com/open-AIMS/UNIQAT/actions/workflows/test.yml/badge.svg)](https://github.com/open-AIMS/UNIQAT/actions/workflows/test.yml)
+[![docs](https://github.com/open-AIMS/UNIQAT/actions/workflows/docs.yml/badge.svg)](https://open-AIMS.github.io/UNIQAT/)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![pip install](https://img.shields.io/badge/pip%20install-editable-orange.svg)](#installation)
+
 An open-source Python library for automated, reference-free underwater image quality assessment. UNIQAT computes 37 metrics across nine categories of image characteristics relevant to underwater environments and produces task-specific composite quality scores for marine science and computer vision applications.
 
 UNIQAT was developed at the [Australian Institute of Marine Science (AIMS)](https://www.aims.gov.au/) and [James Cook University (JCU)](https://www.jcu.edu.au/).
