@@ -174,9 +174,11 @@ class UnderwaterMetrics:
         # Global contrast (RMS contrast)
         rms_contrast = np.std(self.image_gray) / (np.mean(self.image_gray) + 1e-6)
 
-        # Michelson contrast
-        max_val = np.max(self.image_gray)
-        min_val = np.min(self.image_gray)
+        # Michelson contrast. Cast to float first: image_gray is uint8, so
+        # max_val + min_val wraps whenever it exceeds 255, which drove the
+        # denominator to 0 and the metric to ~1e8 (bounded [0, 1] in theory).
+        max_val = float(np.max(self.image_gray))
+        min_val = float(np.min(self.image_gray))
         michelson_contrast = (max_val - min_val) / (max_val + min_val + 1e-6)
 
         # Local contrast (average of local standard deviations)
