@@ -615,22 +615,27 @@ class MultiMetricPredictor(nn.Module):
         )
 
         # Metric names for reference
+        # Names of the 37 metrics returned by
+        # UnderwaterMetrics.calculate_all_metrics(), in the order that method
+        # emits them. Must stay the same length as num_metrics: predict_dict()
+        # indexes the output tensor by position.
         self.metric_names = [
-            'blue_water_severity', 'turbidity_score', 'visibility_score',
-            'rms_contrast', 'michelson_contrast', 'local_contrast',
-            'sharpness_laplacian', 'sharpness_gradient', 'blur_estimate',
-            'edge_density', 'corner_density', 'keypoint_density',
-            'texture_complexity', 'uciqe_score', 'uiqm_score',
-            'entropy_gray', 'entropy_color', 'hue_diversity',
             'blue_channel_mean', 'green_channel_mean', 'red_channel_mean',
-            'blue_dominance', 'green_dominance', 'color_temperature',
-            'weber_contrast', 'lab_contrast', 'multi_scale_edge_density',
-            'blue_green_ratio', 'color_channel_std', 'histogram_uniformity_b',
-            'histogram_uniformity_g', 'histogram_uniformity_r',
+            'blue_dominance', 'green_dominance', 'blue_green_ratio',
+            'blue_water_severity', 'color_temperature', 'color_channel_std',
+            'rms_contrast', 'michelson_contrast', 'local_contrast',
+            'weber_contrast', 'lab_contrast',
+            'sharpness_laplacian', 'sharpness_gradient', 'blur_estimate',
+            'edge_density', 'multi_scale_edge_density', 'corner_density',
+            'keypoint_density', 'texture_complexity',
+            'visibility_score', 'turbidity_score',
+            'uciqe_score', 'uiqm_score',
+            'entropy_gray', 'entropy_color',
+            'histogram_uniformity_b', 'histogram_uniformity_g',
+            'histogram_uniformity_r',
             'dynamic_range_b', 'dynamic_range_g', 'dynamic_range_r',
-            'feature_usefulness_score', 'marine_science_value',
-            'overall_score', 'blue_water_problem_severity',
-            'quality_index', 'clarity_score', 'information_content'
+            'hue_diversity',
+            'feature_usefulness_score', 'marine_science_value'
         ]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

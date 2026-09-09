@@ -56,3 +56,33 @@ def test_multi_metric_predictor_forward_shape():
     with torch.no_grad():
         out = model(_dummy_batch(batch_size=1, image_size=224))
     assert isinstance(out, (torch.Tensor, tuple, list, dict)), type(out)
+
+
+def test_metric_names_match_num_metrics():
+    """metric_names must stay the same length as the model's output width.
+
+    predict_dict() indexes the output tensor by position, so a names list
+    longer than num_metrics raises IndexError at call time.
+    """
+    model = MultiMetricPredictor(pretrained=False)
+    assert len(model.metric_names) == 37
+    assert len(set(model.metric_names)) == len(model.metric_names)
+
+
+def test_predict_dict_returns_one_value_per_name():
+    model = MultiMetricPredictor(pretrained=False)
+    model.eval()
+    with torch.no_grad():
+        out = model.predict_dict(_dummy_batch(batch_size=2, image_size=224))
+    assert set(out) == set(model.metric_names)
+    for name, value in out.items():
+        assert value.shape == (2,), f"{name}: {value.shape}"
+
+
+def test_metric_names_match_traditional_pipeline(good_image_path):
+    """The predicted names must be exactly what the traditional pipeline emits."""
+    from uniqat.core.metrics import UnderwaterMetrics
+
+    produced = UnderwaterMetrics(image_path=str(good_image_path)).calculate_all_metrics()
+    model = MultiMetricPredictor(pretrained=False)
+    assert list(produced.keys()) == model.metric_names
