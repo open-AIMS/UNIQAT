@@ -7,6 +7,9 @@ for end-to-end quality prediction with GPU acceleration.
 
 import warnings
 
+from uniqat.core.metrics import METRIC_NAMES_37
+NUM_METRICS = len(METRIC_NAMES_37)
+
 import timm
 import torch
 import torch.nn as nn
@@ -128,6 +131,16 @@ class UnderwaterQualityNet(nn.Module):
             nn.Sigmoid()
         )
 
+        # Head: the 37 pipeline metrics, so every architecture can be
+        # scored on the same fidelity task as the Multi-Metric Predictor.
+        self.metric_head = nn.Sequential(
+            nn.Linear(512, 512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.3),
+            nn.Linear(512, NUM_METRICS)
+        )
+        self.metric_names = list(METRIC_NAMES_37)
+
     def forward(
         self,
         x_rgb: torch.Tensor,
@@ -194,6 +207,7 @@ class UnderwaterQualityNet(nn.Module):
 
         # Fix squeeze issue: only squeeze last dimension if it's 1
         return {
+            'metrics': self.metric_head(shared_feat),  # (B, 37)
             'quality_score': quality_score.squeeze(-1),  # Keep batch dimension
             'blue_water_severity': blue_water_severity.squeeze(-1),
             'feature_usefulness': feature_usefulness.squeeze(-1),
@@ -201,6 +215,9 @@ class UnderwaterQualityNet(nn.Module):
             'visibility': visibility.squeeze(-1)
         }
 
+    def predict_metrics(self, x_rgb: torch.Tensor, x_lab: torch.Tensor) -> torch.Tensor:
+        """Return only the 37 pipeline metrics, shape (B, 37)."""
+        return self.forward(x_rgb, x_lab)['metrics']
 
 class SpatialAttention(nn.Module):
     """Spatial attention module for feature enhancement."""
@@ -343,6 +360,16 @@ class VisionTransformerQualityNet(nn.Module):
             nn.Sigmoid()
         )
 
+        # Head: the 37 pipeline metrics, so every architecture can be
+        # scored on the same fidelity task as the Multi-Metric Predictor.
+        self.metric_head = nn.Sequential(
+            nn.Linear(256, 512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.3),
+            nn.Linear(512, NUM_METRICS)
+        )
+        self.metric_names = list(METRIC_NAMES_37)
+
     def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         """
         Forward pass through ViT network.
@@ -372,11 +399,15 @@ class VisionTransformerQualityNet(nn.Module):
         feature_usefulness = self.feature_usefulness_head(shared_feat) * 100
 
         return {
+            'metrics': self.metric_head(shared_feat),  # (B, 37)
             'quality_score': quality_score.squeeze(-1),
             'blue_water_severity': blue_water_severity.squeeze(-1),
             'feature_usefulness': feature_usefulness.squeeze(-1)
         }
 
+    def predict_metrics(self, x: torch.Tensor) -> torch.Tensor:
+        """Return only the 37 pipeline metrics, shape (B, 37)."""
+        return self.forward(x)['metrics']
 
 class EfficientNetQualityNet(nn.Module):
     """
@@ -452,6 +483,16 @@ class EfficientNetQualityNet(nn.Module):
             nn.Linear(256, 10)  # Predict 10 key metrics
         )
 
+        # Head: the 37 pipeline metrics, so every architecture can be
+        # scored on the same fidelity task as the Multi-Metric Predictor.
+        self.metric_head = nn.Sequential(
+            nn.Linear(feature_dim, 512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.3),
+            nn.Linear(512, NUM_METRICS)
+        )
+        self.metric_names = list(METRIC_NAMES_37)
+
     def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         """Forward pass through EfficientNet."""
         if x.dim() != 4:
@@ -469,11 +510,15 @@ class EfficientNetQualityNet(nn.Module):
         multi_metrics = self.multi_metric_head(features)
 
         return {
+            'metrics': self.metric_head(features),  # (B, 37)
             'quality_score': quality_score.squeeze(-1),
             'blue_water_severity': blue_water_severity.squeeze(-1),
             'predicted_metrics': multi_metrics  # Keep 2D (B, 10)
         }
 
+    def predict_metrics(self, x: torch.Tensor) -> torch.Tensor:
+        """Return only the 37 pipeline metrics, shape (B, 37)."""
+        return self.forward(x)['metrics']
 
 class SEBlock(nn.Module):
     """
@@ -667,6 +712,14 @@ class MultiMetricPredictor(nn.Module):
         metrics = torch.sigmoid(metrics)
 
         return metrics
+
+    def predict_metrics(self, x: torch.Tensor) -> torch.Tensor:
+        """Return only the 37 pipeline metrics, shape (B, 37).
+
+        Present on all four architectures so they can be scored on the same
+        fidelity task.
+        """
+        return self.forward(x)
 
     def predict_dict(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         """

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "uniqat"
-version = "1.0.1"
+version = "1.0.2"
 description = "UNIQAT: UNderwater Image QUality Assessment Toolkit. Reference-free underwater image quality assessment with 37 metrics across nine categories, optional deep learning models, a Gradio web UI, and SLURM job scripts."
 readme = "README.md"
 license = { file = "LICENSE" }

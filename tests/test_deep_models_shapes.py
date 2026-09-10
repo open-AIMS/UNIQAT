@@ -86,3 +86,21 @@ def test_metric_names_match_traditional_pipeline(good_image_path):
     produced = UnderwaterMetrics(image_path=str(good_image_path)).calculate_all_metrics()
     model = MultiMetricPredictor(pretrained=False)
     assert list(produced.keys()) == model.metric_names
+
+
+def test_all_architectures_predict_37_metrics():
+    """Every architecture must be scoreable on the same 37-metric fidelity task."""
+    x = _dummy_batch(batch_size=2, image_size=224)
+    cases = [
+        (UnderwaterQualityNet, (x, x)),
+        (VisionTransformerQualityNet, (x,)),
+        (EfficientNetQualityNet, (x,)),
+        (MultiMetricPredictor, (x,)),
+    ]
+    for cls, args in cases:
+        model = cls(pretrained=False)
+        model.eval()
+        with torch.no_grad():
+            out = model.predict_metrics(*args)
+        assert out.shape == (2, 37), f"{cls.__name__}: {out.shape}"
+        assert len(model.metric_names) == 37, f"{cls.__name__}: {len(model.metric_names)}"

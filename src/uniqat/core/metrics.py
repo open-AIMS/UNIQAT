@@ -14,6 +14,72 @@ from scipy import ndimage
 warnings.filterwarnings('ignore')
 
 
+METRIC_NAMES_37 = (
+    'blue_channel_mean', 'green_channel_mean', 'red_channel_mean', 'blue_dominance',
+    'green_dominance', 'blue_green_ratio', 'blue_water_severity', 'color_temperature',
+    'color_channel_std', 'rms_contrast', 'michelson_contrast', 'local_contrast',
+    'weber_contrast', 'lab_contrast', 'sharpness_laplacian', 'sharpness_gradient',
+    'blur_estimate', 'edge_density', 'multi_scale_edge_density', 'corner_density',
+    'keypoint_density', 'texture_complexity', 'visibility_score', 'turbidity_score',
+    'uciqe_score', 'uiqm_score', 'entropy_gray', 'entropy_color',
+    'histogram_uniformity_b', 'histogram_uniformity_g', 'histogram_uniformity_r',
+    'dynamic_range_b', 'dynamic_range_g', 'dynamic_range_r', 'hue_diversity',
+    'feature_usefulness_score', 'marine_science_value',
+)
+
+# ---------------------------------------------------------------------------
+#  Custom metric registry
+# ---------------------------------------------------------------------------
+# Lets users add their own metrics without editing this module. A registered
+# function receives the UnderwaterMetrics instance, so it can reuse the decoded
+# image in any colour space (image, image_rgb, image_gray, image_lab, image_hsv)
+# and any built-in metric, and must return a float.
+#
+#     from uniqat.core.metrics import register_metric, UnderwaterMetrics
+#
+#     @register_metric('green_red_ratio')
+#     def green_red_ratio(m):
+#         return float(m.image[:, :, 1].mean() / (m.image[:, :, 2].mean() + 1e-6))
+#
+#     UnderwaterMetrics(image_path='frame.jpg').calculate_all_metrics()['green_red_ratio']
+#
+# Custom metrics are appended to calculate_all_metrics() output, after the 37
+# built-ins. They are additive only: the built-in names and their order are
+# unchanged, so downstream code and the 37-wide deep-learning heads are
+# unaffected. The deep models predict the 37 built-ins only; a custom metric is
+# computed by the traditional pipeline and has no learned counterpart.
+
+_CUSTOM_METRICS = {}
+
+
+def register_metric(name, fn=None):
+    """Register a custom metric under `name`.
+
+    Usable as a decorator or called directly. Raises ValueError if the name
+    collides with a built-in metric, so a typo cannot silently replace one.
+    """
+    if name in METRIC_NAMES_37:
+        raise ValueError(
+            f"'{name}' is a built-in metric; choose another name so the "
+            f"built-in cannot be silently overwritten"
+        )
+
+    def _register(func):
+        _CUSTOM_METRICS[name] = func
+        return func
+
+    return _register(fn) if fn is not None else _register
+
+
+def unregister_metric(name):
+    """Remove a previously registered custom metric. Returns True if removed."""
+    return _CUSTOM_METRICS.pop(name, None) is not None
+
+
+def registered_metrics():
+    """Names of all currently registered custom metrics."""
+    return sorted(_CUSTOM_METRICS)
+
 class UnderwaterMetrics:
     """
     A comprehensive collection of underwater image quality metrics.
@@ -117,6 +183,11 @@ class UnderwaterMetrics:
         # Overall quality scores
         metrics['feature_usefulness_score'] = self.calculate_feature_usefulness()
         metrics['marine_science_value'] = self.calculate_marine_science_value()
+
+
+        # User-registered custom metrics (see register_metric above).
+        for _name, _fn in _CUSTOM_METRICS.items():
+            metrics[_name] = float(_fn(self))
 
         return metrics
 
@@ -401,16 +472,27 @@ class UnderwaterMetrics:
         Reference: Yang, M., & Sowmya, A. (2015). "An underwater color image
         quality evaluation metric." IEEE TIP.
 
+        Note: releases up to v1.0.1 omitted the +128 offset that OpenCV applies
+        to the a and b channels of 8-bit LAB, which inflated this metric by
+        roughly 5x. Values reported in the UNIQAT manuscript were produced with
+        that earlier definition and are not comparable to values from this
+        version. A model trained on pre-v1.0.2 labels predicts the old variant.
+
         Returns
         -------
         float
             UCIQE score
         """
-        # Convert to LAB
+        # Convert to LAB. OpenCV stores 8-bit LAB with a and b offset by +128,
+        # so neutral grey is (128, 128) rather than (0, 0). The offset must be
+        # removed before computing chroma, otherwise a neutral grey image scores
+        # chroma 0.71 instead of 0 and UCIQE comes out roughly 5x inflated.
         lab = self.image_lab.astype(float) / 255.0
+        a_star = lab[:, :, 1] - 128.0 / 255.0
+        b_star = lab[:, :, 2] - 128.0 / 255.0
 
         # Chroma
-        chroma = np.sqrt(lab[:, :, 1]**2 + lab[:, :, 2]**2)
+        chroma = np.sqrt(a_star**2 + b_star**2)
 
         # Standard deviation of chroma
         sigma_c = np.std(chroma)

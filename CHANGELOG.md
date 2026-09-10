@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-09-10
+
+Corrects a second metric defect and makes the deep learning branch usable for
+the fidelity comparison reported in the accompanying manuscript.
+
+### Fixed
+
+- **UCIQE was inflated by roughly 5x.** OpenCV stores 8-bit LAB with the a and b
+  channels offset by +128, so neutral grey is (128, 128) rather than (0, 0). The
+  offset was not removed before computing chroma, so a neutral grey image scored
+  chroma 0.71 instead of 0. Values reported in the UNIQAT manuscript were
+  produced with the earlier definition and are not comparable to values from
+  this release. Because UCIQE contributes 10 of the 100 points of the marine
+  science value subscore, and that subscore carries a coefficient of 0.35, the
+  correction also shifts the overall score by up to 3.5 points.
+
+### Added
+
+- **A 37-metric head on all four architectures.** Previously only the
+  Multi-Metric Predictor emitted the full metric vector; the other three carried
+  three to five summary heads and could not be scored on the same task. Each now
+  exposes `predict_metrics()` returning shape (B, 37), and `metric_names` drawn
+  from a single shared constant so the four cannot drift apart. Parameter counts
+  become 52.6M, 86.6M, 13.9M and 26.1M.
+- **A custom metric registry.** `register_metric()`, `unregister_metric()` and
+  `registered_metrics()` let users add metrics without editing the package or
+  subclassing. Registered metrics are appended after the 37 built-ins, whose
+  names and order are unchanged, and registering a name that collides with a
+  built-in raises rather than silently replacing it.
+- Regression tests for all of the above.
+
+### Notes for existing users
+
+A model trained on labels from an earlier release predicts the old UCIQE
+variant. Retrain, or treat that output as the pre-1.0.2 definition. Cached
+assessment outputs should be recomputed if UCIQE or the overall score matters
+to you.
+
 ## [1.0.1] - 2026-09-10
 
 Patch release fixing two defects found while preparing the revision of the
