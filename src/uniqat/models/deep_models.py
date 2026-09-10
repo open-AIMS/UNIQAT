@@ -134,10 +134,10 @@ class UnderwaterQualityNet(nn.Module):
         # Head: the 37 pipeline metrics, so every architecture can be
         # scored on the same fidelity task as the Multi-Metric Predictor.
         self.metric_head = nn.Sequential(
-            nn.Linear(512, 512),
+            nn.Linear(512, 256),
             nn.ReLU(inplace=True),
-            nn.Dropout(0.3),
-            nn.Linear(512, NUM_METRICS)
+            nn.Dropout(dropout),
+            nn.Linear(256, NUM_METRICS)
         )
         self.metric_names = list(METRIC_NAMES_37)
 
@@ -363,10 +363,10 @@ class VisionTransformerQualityNet(nn.Module):
         # Head: the 37 pipeline metrics, so every architecture can be
         # scored on the same fidelity task as the Multi-Metric Predictor.
         self.metric_head = nn.Sequential(
-            nn.Linear(256, 512),
+            nn.Linear(256, 256),
             nn.ReLU(inplace=True),
-            nn.Dropout(0.3),
-            nn.Linear(512, NUM_METRICS)
+            nn.Dropout(dropout),
+            nn.Linear(256, NUM_METRICS)
         )
         self.metric_names = list(METRIC_NAMES_37)
 
@@ -480,16 +480,7 @@ class EfficientNetQualityNet(nn.Module):
             nn.Dropout(dropout),
             nn.Linear(512, 256),
             nn.ReLU(inplace=True),
-            nn.Linear(256, 10)  # Predict 10 key metrics
-        )
-
-        # Head: the 37 pipeline metrics, so every architecture can be
-        # scored on the same fidelity task as the Multi-Metric Predictor.
-        self.metric_head = nn.Sequential(
-            nn.Linear(feature_dim, 512),
-            nn.ReLU(inplace=True),
-            nn.Dropout(0.3),
-            nn.Linear(512, NUM_METRICS)
+            nn.Linear(256, NUM_METRICS)  # the 37 pipeline metrics
         )
         self.metric_names = list(METRIC_NAMES_37)
 
@@ -510,10 +501,10 @@ class EfficientNetQualityNet(nn.Module):
         multi_metrics = self.multi_metric_head(features)
 
         return {
-            'metrics': self.metric_head(features),  # (B, 37)
+            'metrics': multi_metrics,  # (B, 37)
             'quality_score': quality_score.squeeze(-1),
             'blue_water_severity': blue_water_severity.squeeze(-1),
-            'predicted_metrics': multi_metrics  # Keep 2D (B, 10)
+            'predicted_metrics': multi_metrics  # Keep 2D (B, 37)
         }
 
     def predict_metrics(self, x: torch.Tensor) -> torch.Tensor:
