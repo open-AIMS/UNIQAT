@@ -27,8 +27,11 @@ the fidelity comparison reported in the accompanying manuscript.
   Multi-Metric Predictor emitted the full metric vector; the other three carried
   three to five summary heads and could not be scored on the same task. Each now
   exposes `predict_metrics()` returning shape (B, 37), and `metric_names` drawn
-  from a single shared constant so the four cannot drift apart. Parameter counts
-  become 52.6M, 86.6M, 13.9M and 26.1M.
+  from a single shared constant so the four cannot drift apart. The head widths
+  match the implementation the fidelity results in the manuscript were measured
+  on, so parameter counts are 52.47M for UnderwaterQualityNet, 86.50M for the
+  Vision Transformer, 13.10M for EfficientNet-B3 and 26.15M for the Multi-Metric
+  Predictor, as reported in Supplementary Table S1.
 - **A custom metric registry.** `register_metric()`, `unregister_metric()` and
   `registered_metrics()` let users add metrics without editing the package or
   subclassing. Registered metrics are appended after the 37 built-ins, whose
