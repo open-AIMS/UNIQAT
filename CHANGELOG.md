@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-09-11
+
+Corrects the 37-metric heads added in 1.0.2, which did not match the models the
+deep learning results in the accompanying manuscript were measured on.
+
+### Fixed
+
+- **Metric head widths on three of the four architectures.** The heads added in
+  1.0.2 were written independently of the implementation used for the fidelity
+  runs and used wider hidden layers, so the released package and the manuscript
+  described different models. UnderwaterQualityNet goes from a 512-unit hidden
+  layer to 256, VisionTransformerQualityNet from 512 to 256, and
+  EfficientNetQualityNet now widens its existing `multi_metric_head` to 37
+  outputs instead of carrying a second parallel head. MultiMetricPredictor was
+  already correct.
+
+  Parameter counts are now 52.47M for UnderwaterQualityNet, 86.50M for the
+  Vision Transformer, 13.10M for EfficientNet-B3 and 26.15M for the
+  Multi-Metric Predictor, which are the figures in Supplementary Table S1 of the
+  manuscript. Verified by instantiating each model and counting.
+
+- **Dropout in the two rewritten heads** now follows the constructor's `dropout`
+  argument rather than being hardcoded at 0.3, matching the surrounding heads.
+
+### Notes for existing users
+
+No metric value changes: this release touches only the deep learning heads, not
+the traditional pipeline. A checkpoint trained against 1.0.2 will not load into
+1.0.3, because three of the four state dicts changed shape. Retrain, or pin
+1.0.2 if you need to load an existing checkpoint.
+
+This is the release the accompanying manuscript cites.
+
 ## [1.0.2] - 2026-09-10
 
 Corrects a second metric defect and makes the deep learning branch usable for
@@ -27,11 +60,9 @@ the fidelity comparison reported in the accompanying manuscript.
   Multi-Metric Predictor emitted the full metric vector; the other three carried
   three to five summary heads and could not be scored on the same task. Each now
   exposes `predict_metrics()` returning shape (B, 37), and `metric_names` drawn
-  from a single shared constant so the four cannot drift apart. The head widths
-  match the implementation the fidelity results in the manuscript were measured
-  on, so parameter counts are 52.47M for UnderwaterQualityNet, 86.50M for the
-  Vision Transformer, 13.10M for EfficientNet-B3 and 26.15M for the Multi-Metric
-  Predictor, as reported in Supplementary Table S1.
+  from a single shared constant so the four cannot drift apart. Parameter counts
+  become 52.6M, 86.6M, 13.9M and 26.1M. (These head widths were wrong; see
+  1.0.3.)
 - **A custom metric registry.** `register_metric()`, `unregister_metric()` and
   `registered_metrics()` let users add metrics without editing the package or
   subclassing. Registered metrics are appended after the 37 built-ins, whose

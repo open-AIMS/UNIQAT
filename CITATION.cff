@@ -31,8 +31,8 @@ authors:
     affiliation: >-
       Australian Institute of Marine Science, Townsville,
       QLD, Australia
-version: 1.0.2
-date-released: '2026-09-10'
+version: 1.0.3
+date-released: '2026-09-11'
 license: MIT
 repository-code: 'https://github.com/open-AIMS/UNIQAT'
 url: 'https://github.com/open-AIMS/UNIQAT'
