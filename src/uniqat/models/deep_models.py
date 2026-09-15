@@ -7,13 +7,14 @@ for end-to-end quality prediction with GPU acceleration.
 
 import warnings
 
-from uniqat.core.metrics import METRIC_NAMES_37
-NUM_METRICS = len(METRIC_NAMES_37)
-
 import timm
 import torch
 import torch.nn as nn
 from torchvision import models
+
+from uniqat.core.metrics import METRIC_NAMES_37
+
+NUM_METRICS = len(METRIC_NAMES_37)
 
 
 class UnderwaterQualityNet(nn.Module):
