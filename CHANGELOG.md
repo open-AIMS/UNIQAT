@@ -23,7 +23,7 @@ deep learning results in the accompanying manuscript were measured on.
 
   Parameter counts are now 52.47M for UnderwaterQualityNet, 86.50M for the
   Vision Transformer, 13.10M for EfficientNet-B3 and 26.15M for the
-  Multi-Metric Predictor, which are the figures in Supplementary Table S1 of the
+  Multi-Metric Predictor, which are the figures in Supplementary Table S2 of the
   manuscript. Verified by instantiating each model and counting.
 
 - **Dropout in the two rewritten heads** now follows the constructor's `dropout`
