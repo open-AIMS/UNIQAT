@@ -365,6 +365,12 @@ If you use UNIQAT in your research, please cite:
 }
 ```
 
+The software release used in the paper, v1.0.3, is archived on Zenodo:
+
+> Saleh, A., & Chennu, A. (2026). UNIQAT: UNderwater Image QUality Assessment
+> Toolkit (Version 1.0.3) [Software]. Zenodo. https://doi.org/10.5281/zenodo.22928186
+
+
 ## Licence
 
 This project is licensed under the MIT Licence. See [LICENSE](LICENSE) for details.
