@@ -337,18 +337,31 @@ UNIQAT/
 
 Correspondence: alzayat.saleh@my.jcu.edu.au
 
+## Data
+
+The per-image quality scores for the 130,845 ReefScan images analysed in the
+accompanying paper, with GPS position, sonar depth and timestamp, and the
+per-survey summary tables, are archived in the AIMS Data Repository:
+
+> Saleh, A., & Chennu, A. (2026). ReefScan underwater imagery from nine Great
+> Barrier Reef surveys, with per-image quality assessments (UNIQAT) [Dataset].
+> Australian Institute of Marine Science. https://doi.org/10.25845/5KRB-J094
+
+The source images are held by the Australian Institute of Marine Science and are
+not publicly archived because of their size (about 624 GB).
+
 ## Citation
 
 If you use UNIQAT in your research, please cite:
 
 ```bibtex
-@article{saleh2025uniqat,
+@article{saleh2026uniqat,
   title={UNIQAT: An Open-Source Toolkit for Reproducible Image Quality
          Assessment in Marine Surveys},
   author={Saleh, Alzayat and Chennu, Arjun},
   journal={Methods in Ecology and Evolution},
-  year={2025},
-  note={In review}
+  year={2026},
+  note={Accepted}
 }
 ```
 
